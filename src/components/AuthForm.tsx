@@ -39,6 +39,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
 
     if (res.error) {
       setBusy(false);
+
+      alert(res.error);
       setError(messages[res.error.code ?? ""] ?? res.error.message ?? "Algo deu errado. Tente de novo.");
     }
   }
