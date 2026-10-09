@@ -8,7 +8,7 @@ import TopBar from "@/components/TopBar";
 import { ui } from "@/lib/ui";
 
 // Rota do servidor (o Next encaminha para o Express, ver next.config.mjs).
-const USER_URL = process.env.NEXT_PUBLIC_SOCKET_URL;
+const USER_URL = `${process.env.NEXT_PUBLIC_SOCKET_URL}/user`;
 
 type Profile = { id: string; name: string; image?: string | null };
 
