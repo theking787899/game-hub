@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={`${display.variable} ${body.variable}`}>
-      <body>
+      <body className="min-h-dvh bg-cobalt font-sans text-[1.0625rem] leading-normal text-chalk">
         <GameProvider>{children}</GameProvider>
       </body>
     </html>
