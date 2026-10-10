@@ -162,10 +162,10 @@ export default function GameProvider({ children }: { children: ReactNode }) {
   }, [room]);
 
   const startQuiz = useCallback(
-    (questions: QuizData[]) => {
+    () => {
       if (!room) return;
       setError(null);
-      getSocket().emit("quiz:start", { roomId: room.id, questions });
+      getSocket().emit("quiz:start", { roomId: room.id});
     },
     [room],
   );

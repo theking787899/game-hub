@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useGame } from "@/components/GameProvider";
 import QuizGame from "@/components/QuizGame";
 import TopBar from "@/components/TopBar";
-import { pickQuestions } from "@/lib/questions";
 import { errorText } from "@/lib/types";
 
 export default function RoomPage() {
@@ -125,7 +124,7 @@ export default function RoomPage() {
         {isHost ? (
           <>
             <p>Perguntas de conhecimentos gerais. O primeiro a acertar ganha o ponto.</p>
-            <button className="btn btn-ink" onClick={() => startQuiz(pickQuestions(8))}>
+            <button className="btn btn-ink" onClick={() => startQuiz()}>
               Começar quiz
             </button>
           </>
