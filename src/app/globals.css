@@ -31,7 +31,12 @@
   --font-sans: var(--font-figtree), system-ui, sans-serif;
 }
 
-:focus-visible {
-  outline: 3px solid var(--color-sun);
-  outline-offset: 3px;
+/* Dentro do @layer base para que as classes do Tailwind (ex.: focus-visible:outline-cobalt)
+   consigam sobrescrever. Anel em duas cores: aparece no azul, no giz e no amarelo. */
+@layer base {
+  :focus-visible {
+    outline: 3px solid var(--color-sun);
+    outline-offset: 3px;
+    box-shadow: 0 0 0 3px var(--color-ink);
+  }
 }
