@@ -1,14 +1,22 @@
+
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { getSocket } from "@/lib/socket";
+
 import {
   normalizeRoom,
   type AnswerResult,
   type GameError,
-  type QuizData,
   type QuizQuestion,
   type QuizState,
   type RawRoom,
@@ -16,7 +24,11 @@ import {
   type ScoreEntry,
 } from "@/lib/types";
 
-type QuestionPayload = { question: QuizQuestion; questionIndex: number; total?: number };
+type QuestionPayload = {
+  question: QuizQuestion;
+  questionIndex: number;
+  total?: number;
+};
 
 type GameContextValue = {
   user: { id: string; name: string } | null;
@@ -25,26 +37,39 @@ type GameContextValue = {
   room: Room | null;
   error: GameError | null;
   quiz: QuizState | null;
+
   createRoom: () => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: () => void;
+
+  createQuiz: () => void;
   startQuiz: () => void;
   answerQuiz: (answer: string) => void;
   closeQuiz: () => void;
+
   signOut: () => Promise<void>;
 };
 
 const GameContext = createContext<GameContextValue | null>(null);
 
 export function useGame() {
-  const ctx = useContext(GameContext);
-  if (!ctx) throw new Error("useGame precisa estar dentro de GameProvider");
-  return ctx;
+  const context = useContext(GameContext);
+
+  if (!context) {
+    throw new Error("useGame precisa estar dentro de GameProvider");
+  }
+
+  return context;
 }
 
-export default function GameProvider({ children }: { children: ReactNode }) {
+export default function GameProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
+
   const user = session?.user ?? null;
   const userId = user?.id;
 
@@ -53,9 +78,15 @@ export default function GameProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<GameError | null>(null);
   const [quiz, setQuiz] = useState<QuizState | null>(null);
 
-  // Conecta o socket quando há sessão e desconecta ao sair.
+  // Socket e eventos recebidos do servidor.
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setConnected(false);
+      setRoom(null);
+      setQuiz(null);
+      return;
+    }
+
     const socket = getSocket();
 
     const handlers = {
@@ -63,32 +94,63 @@ export default function GameProvider({ children }: { children: ReactNode }) {
         setConnected(true);
         setError(null);
       },
-      disconnect: () => setConnected(false),
+
+      disconnect: () => {
+        setConnected(false);
+      },
+
       connect_error: () => {
         setConnected(false);
-        setError({ code: "CONNECTION", message: "" });
+        setError({
+          code: "CONNECTION",
+          message: "Não foi possível conectar ao servidor.",
+        });
       },
+
       "room:created": (raw: RawRoom) => {
-        const created = normalizeRoom(raw);
-        setRoom(created);
-        router.push(`/room/${created.id}`);
+        const createdRoom = normalizeRoom(raw);
+
+        setRoom(createdRoom);
+        setError(null);
+        router.push(`/room/${createdRoom.id}`);
       },
-      "room:joined": (raw: RawRoom) => setRoom(normalizeRoom(raw)),
-      "room:updated": (raw: RawRoom) => setRoom(normalizeRoom(raw)),
+
+      "room:joined": (raw: RawRoom) => {
+        setRoom(normalizeRoom(raw));
+        setError(null);
+      },
+
+      "room:updated": (raw: RawRoom) => {
+        setRoom(normalizeRoom(raw));
+      },
+
       "room:left": () => {
         setRoom(null);
         setQuiz(null);
       },
-      "room:error": (e: GameError) => setError(e),
 
-      // Quiz: eventos de pergunta fora de um quiz iniciado são ignorados.
-      "quiz:started": (p: QuestionPayload) => {
+      "room:error": (gameError: GameError) => {
+        setError(gameError);
+      },
+
+      // O servidor confirmou que o quiz foi criado.
+      // Só então pedimos para iniciá-lo.
+      "quiz:created": (payload: { roomId: string }) => {
         setError(null);
+        socket.emit("quiz:start", {
+          roomId: payload.roomId,
+        });
+      },
+
+      // Primeira pergunta.
+      "quiz:started": (payload: QuestionPayload) => {
+        setError(null);
+
         setQuiz({
           phase: "question",
-          question: p.question,
-          index: p.questionIndex,
-          total: p.total,
+          question: payload.question,
+          index: payload.questionIndex,
+          total: payload.total,
           myAnswer: null,
           winnerId: null,
           wrongIds: [],
@@ -96,111 +158,208 @@ export default function GameProvider({ children }: { children: ReactNode }) {
           scores: {},
         });
       },
-      "quiz:next-question": (p: QuestionPayload) =>
-        setQuiz((q) =>
-          q && {
-            ...q,
+
+      // Perguntas seguintes.
+      "quiz:next-question": (payload: QuestionPayload) => {
+        setQuiz((currentQuiz) => {
+          if (!currentQuiz) return currentQuiz;
+
+          return {
+            ...currentQuiz,
             phase: "question",
-            question: p.question,
-            index: p.questionIndex,
-            total: p.total ?? q.total,
+            question: payload.question,
+            index: payload.questionIndex,
+            total: payload.total ?? currentQuiz.total,
             myAnswer: null,
             winnerId: null,
             wrongIds: [],
             roundOver: false,
-          },
-        ),
-      "quiz:answer-result": (r: AnswerResult) =>
-        setQuiz((q) => {
-          if (!q || !r.accepted) return q;
-          return {
-            ...q,
-            scores: { ...q.scores, [r.playerId]: r.score },
-            wrongIds: r.correct ? q.wrongIds : [...q.wrongIds, r.playerId],
-            winnerId: r.correct ? r.playerId : q.winnerId,
-            roundOver: r.questionFinished,
           };
-        }),
-      "quiz:finished": (p: { scores: ScoreEntry[] }) =>
-        setQuiz((q) =>
-          q && {
-            ...q,
+        });
+      },
+
+      // Resultado de uma resposta.
+      "quiz:answer-result": (result: AnswerResult) => {
+        setQuiz((currentQuiz) => {
+          if (!currentQuiz || !result.accepted) {
+            return currentQuiz;
+          }
+
+          const wrongIds = result.correct
+            ? currentQuiz.wrongIds
+            : currentQuiz.wrongIds.includes(result.playerId)
+              ? currentQuiz.wrongIds
+              : [...currentQuiz.wrongIds, result.playerId];
+
+          return {
+            ...currentQuiz,
+            scores: {
+              ...currentQuiz.scores,
+              [result.playerId]: result.score,
+            },
+            wrongIds,
+            winnerId: result.correct
+              ? result.playerId
+              : currentQuiz.winnerId,
+            roundOver: result.questionFinished,
+          };
+        });
+      },
+
+      // Fim do quiz.
+      "quiz:finished": (payload: { scores: ScoreEntry[] }) => {
+        setQuiz((currentQuiz) => {
+          if (!currentQuiz) return currentQuiz;
+
+          return {
+            ...currentQuiz,
             phase: "finished",
-            scores: Object.fromEntries(p.scores.map((s) => [s.playerId, s.score])),
-          },
-        ),
-      "quiz:error": (e: { message: string }) => setError({ code: "QUIZ", message: e.message }),
+            scores: Object.fromEntries(
+              payload.scores.map((score) => [
+                score.playerId,
+                score.score,
+              ])
+            ),
+          };
+        });
+      },
+
+      "quiz:error": (payload: {
+        code?: string;
+        message: string;
+      }) => {
+        setError({
+          code: payload.code ?? "QUIZ",
+          message: payload.message,
+        });
+      },
     };
 
-    for (const [event, fn] of Object.entries(handlers)) socket.on(event, fn);
+    for (const [event, handler] of Object.entries(handlers)) {
+      socket.on(event, handler);
+    }
+
     socket.connect();
 
     return () => {
-      for (const [event, fn] of Object.entries(handlers)) socket.off(event, fn);
+      for (const [event, handler] of Object.entries(handlers)) {
+        socket.off(event, handler);
+      }
+
       socket.disconnect();
+
       setConnected(false);
       setRoom(null);
       setQuiz(null);
     };
   }, [userId, router]);
 
+  // Criar sala.
   const createRoom = useCallback(() => {
     setError(null);
     getSocket().emit("room:create");
   }, []);
 
+  // Entrar em sala.
   const joinRoom = useCallback((roomId: string) => {
     setError(null);
     getSocket().emit("room:join", { roomId });
   }, []);
 
+  // Sair da sala.
   const leaveRoom = useCallback(() => {
-    if (room) getSocket().emit("room:leave", { roomId: room.id });
+    if (room) {
+      getSocket().emit("room:leave", {
+        roomId: room.id,
+      });
+    }
+
     setRoom(null);
     setQuiz(null);
     setError(null);
   }, [room]);
 
-  const startQuiz = useCallback(
-    () => {
-      if (!room) return;
-      setError(null);
-      getSocket().emit("quiz:start", { roomId: room.id});
-    },
-    [room],
-  );
+  // Criar quiz no servidor.
+  const createQuiz = useCallback(() => {
+    if (!room) return;
 
+    setError(null);
+
+    getSocket().emit("quiz:create", {
+      roomId: room.id,
+    });
+  }, [room]);
+
+  // Iniciar quiz.
+  // Útil caso queira iniciar manualmente em outro componente.
+  const startQuiz = useCallback(() => {
+    if (!room) return;
+
+    setError(null);
+
+    getSocket().emit("quiz:start", {
+      roomId: room.id,
+    });
+  }, [room]);
+
+  // Enviar resposta.
   const answerQuiz = useCallback(
     (answer: string) => {
       if (!room) return;
-      setQuiz((q) => q && { ...q, myAnswer: answer });
-      getSocket().emit("quiz:answer", { roomId: room.id, answer });
+
+      setQuiz((currentQuiz) =>
+        currentQuiz
+          ? { ...currentQuiz, myAnswer: answer }
+          : currentQuiz
+      );
+
+      getSocket().emit("quiz:answer", {
+        roomId: room.id,
+        answer,
+      });
     },
-    [room],
+    [room]
   );
 
-  const closeQuiz = useCallback(() => setQuiz(null), []);
+  // Fechar a interface do quiz no cliente.
+  const closeQuiz = useCallback(() => {
+    setQuiz(null);
+  }, []);
 
   const signOut = useCallback(async () => {
     await authClient.signOut();
+
+    setRoom(null);
+    setQuiz(null);
+
     router.replace("/login");
   }, [router]);
 
   return (
     <GameContext.Provider
       value={{
-        user: user ? { id: user.id, name: user.name } : null,
+        user: user
+          ? {
+              id: user.id,
+              name: user.name,
+            }
+          : null,
+
         authPending: isPending,
         connected,
         room,
         error,
         quiz,
+
         createRoom,
         joinRoom,
         leaveRoom,
+
+        createQuiz,
         startQuiz,
         answerQuiz,
         closeQuiz,
+
         signOut,
       }}
     >

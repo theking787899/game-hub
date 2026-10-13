@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,22 +9,43 @@ import TopBar from "@/components/TopBar";
 import { errorText } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
-const seatColors = ["bg-punch", "bg-sun", "bg-mint", "bg-sky", "bg-lilac"];
+const seatColors = [
+  "bg-punch",
+  "bg-sun",
+  "bg-mint",
+  "bg-sky",
+  "bg-lilac",
+];
 
 export default function RoomView() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const { user, authPending, connected, room, error, quiz, joinRoom, leaveRoom, startQuiz } =
-    useGame();
+
+  const {
+    user,
+    authPending,
+    connected,
+    room,
+    error,
+    quiz,
+    joinRoom,
+    leaveRoom,
+    createQuiz,
+  } = useGame();
+
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!authPending && !user) router.replace("/login");
+    if (!authPending && !user) {
+      router.replace("/login");
+    }
   }, [authPending, user, router]);
 
-  // Entra na sala do link (também ao recarregar a página ou reconectar).
+  // Entra na sala ao abrir o link ou reconectar.
   useEffect(() => {
-    if (connected && user && room?.id !== id) joinRoom(id);
+    if (connected && user && room?.id !== id) {
+      joinRoom(id);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected, user?.id, id]);
 
@@ -33,12 +55,22 @@ export default function RoomView() {
   }
 
   async function copyLink() {
-    await navigator.clipboard.writeText(`${window.location.origin}/room/${id}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/room/${id}`
+      );
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // A cópia pode falhar se o navegador não permitir acesso à área de transferência.
+      setCopied(false);
+    }
   }
 
-  if (authPending || !user) return <main className={ui.center}>Carregando…</main>;
+  if (authPending || !user) {
+    return <main className={ui.center}>Carregando…</main>;
+  }
 
   const current = room?.id === id ? room : null;
 
@@ -46,10 +78,13 @@ export default function RoomView() {
     return (
       <main className={ui.shell}>
         <TopBar />
+
         <h1 className={ui.h1}>Não deu para entrar na sala</h1>
+
         <p role="alert" className={`${ui.alert} mt-6`}>
           {errorText(error)}
         </p>
+
         <p className="mt-6">
           <button className={ui.btnSun} onClick={leave}>
             Voltar ao início
@@ -59,8 +94,15 @@ export default function RoomView() {
     );
   }
 
-  if (!current) return <main className={ui.center}>Entrando na sala…</main>;
+  if (!current) {
+    return (
+      <main className={ui.center}>
+        Entrando na sala…
+      </main>
+    );
+  }
 
+  // Se o quiz começou, exibe a interface do jogo.
   if (quiz) {
     return (
       <main className={ui.shell}>
@@ -70,15 +112,24 @@ export default function RoomView() {
     );
   }
 
-  const seats = Array.from({ length: current.maxPlayer }, (_, i) => current.players[i] ?? null);
+  const seats = Array.from(
+    { length: current.maxPlayer },
+    (_, i) => current.players[i] ?? null
+  );
+
   const full = current.players.length >= current.maxPlayer;
-  const isHost = !!current.players.find((p) => p.id === user.id)?.host;
+
+  const isHost = !!current.players.find(
+    (player) => player.id === user.id
+  )?.host;
 
   return (
     <main className={ui.shell}>
       <TopBar />
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className={ui.h1}>Sala de espera</h1>
+
         <button className={ui.btnGhost} onClick={leave}>
           Sair da sala
         </button>
@@ -88,6 +139,7 @@ export default function RoomView() {
         <code className="break-all rounded-[14px] bg-deep px-4 py-2.5 text-[0.95rem]">
           {current.id}
         </code>
+
         <button className={ui.btnSun} onClick={copyLink}>
           {copied ? "Link copiado" : "Copiar link"}
         </button>
@@ -95,32 +147,45 @@ export default function RoomView() {
 
       <p className="mt-10 font-semibold" aria-live="polite">
         {current.players.length} de {current.maxPlayer} jogadores.{" "}
-        {full ? "A sala está cheia." : "Mande o link para chamar o resto do grupo."}
+        {full
+          ? "A sala está cheia."
+          : "Mande o link para chamar o resto do grupo."}
       </p>
 
       <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-5">
-        {seats.map((p, i) =>
-          p ? (
+        {seats.map((player, i) =>
+          player ? (
             <li
-              key={p.id}
+              key={player.id}
               className={`flex min-h-[210px] flex-col items-center justify-center gap-2.5 rounded-[32px] p-5 text-center text-ink motion-safe:animate-pop ${
-                seatColors[i % 5]
+                seatColors[i % seatColors.length]
               } ${i % 2 === 0 ? "-rotate-2" : "rotate-[1.5deg]"}`}
             >
               <div className="grid size-[84px] place-items-center overflow-hidden rounded-full bg-chalk font-display text-[2.4rem] font-extrabold">
-                {p.avatar?.startsWith("http") ? (
+                {player.avatar?.startsWith("http") ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.avatar} alt="" className="size-full object-cover" />
+                  <img
+                    src={player.avatar}
+                    alt=""
+                    className="size-full object-cover"
+                  />
                 ) : (
-                  p.name.trim().charAt(0).toUpperCase()
+                  player.name.trim().charAt(0).toUpperCase()
                 )}
               </div>
+
               <span className="font-display text-xl font-extrabold leading-tight [overflow-wrap:anywhere]">
-                {p.name}
+                {player.name}
               </span>
+
               <span className="flex flex-wrap justify-center gap-1.5">
-                <span className={ui.tag}>{p.host ? "Anfitrião" : "Jogador"}</span>
-                {p.id === user.id && <span className={ui.tag}>Você</span>}
+                <span className={ui.tag}>
+                  {player.host ? "Anfitrião" : "Jogador"}
+                </span>
+
+                {player.id === user.id && (
+                  <span className={ui.tag}>Você</span>
+                )}
               </span>
             </li>
           ) : (
@@ -130,18 +195,27 @@ export default function RoomView() {
             >
               Vaga livre
             </li>
-          ),
+          )
         )}
       </ul>
 
-      <section className={`${ui.panel} mt-8 max-w-[520px] items-start bg-sun p-8`}>
+      <section
+        className={`${ui.panel} mt-8 max-w-[520px] items-start bg-sun p-8`}
+      >
         <h2 className={ui.h2}>Quiz</h2>
+
         {isHost ? (
           <>
             <p className="max-w-[36ch]">
-              Perguntas de conhecimentos gerais. O primeiro a acertar ganha o ponto.
+              Perguntas de conhecimentos gerais. O primeiro a acertar ganha
+              o ponto.
             </p>
-            <button className={ui.btnInk} onClick={() => startQuiz()}>
+
+            <button
+              className={ui.btnInk}
+              onClick={createQuiz}
+              disabled={!connected}
+            >
               Começar quiz
             </button>
           </>
