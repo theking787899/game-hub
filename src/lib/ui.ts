@@ -1,28 +1,29 @@
 // Combinações de classes Tailwind usadas em várias telas.
 const btn =
-  "cursor-pointer rounded-full px-6 py-3 font-bold transition-transform enabled:active:translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50";
-const heading = "font-display font-extrabold leading-[1.05] tracking-tight";
+  "inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[0.95rem] font-semibold transition enabled:active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50";
+const serif = "font-display font-normal tracking-tight";
+const tag = "inline-flex items-center rounded-md border px-2 py-0.5 font-mono text-[0.72rem]";
 
 export const ui = {
-  shell: "mx-auto w-full max-w-[1080px] px-5 pb-14 pt-5",
-  center: "grid min-h-dvh place-items-center text-center",
-  h1: `${heading} text-[clamp(2.4rem,7vw,4.25rem)]`,
-  h2: `${heading} text-[1.75rem]`,
-  lead: "mt-4 max-w-[52ch] text-xl",
+  shell: "mx-auto w-full max-w-[1080px] px-5 pb-16 pt-5",
+  center: "grid min-h-dvh place-items-center text-center text-muted",
+  h1: `${serif} text-[clamp(2.8rem,7.5vw,4.75rem)] leading-none`,
+  h2: `${serif} text-[2rem] leading-[1.05]`,
+  lead: "mt-4 max-w-[50ch] text-lg text-muted",
 
-  btnInk: `${btn} bg-ink text-chalk`,
-  btnCobalt: `${btn} bg-cobalt text-chalk`,
-  btnSun: `${btn} bg-sun text-ink`,
-  btnGhost:
-    "cursor-pointer rounded-full border-2 border-current px-4 py-1.5 font-bold transition-transform active:translate-y-0.5",
+  card: "rounded-2xl border border-line bg-surface",
 
-  // Painel sem padding nem alinhamento: cada tela define os seus.
-  panel: "flex flex-col gap-4 rounded-[28px] text-ink",
-  label: "flex w-full flex-col gap-1.5 font-semibold",
+  btnPrimary: `${btn} bg-accent text-accent-fg hover:brightness-105`,
+  btnSecondary: `${btn} border border-line bg-surface-2 text-fg hover:border-fg/30`,
+  btnGhost: `${btn} text-muted hover:bg-surface-2 hover:text-fg`,
+
+  label: "flex w-full flex-col gap-1.5 text-sm font-medium",
   input:
-    "rounded-[14px] border-2 border-[#c9c4ee] bg-white px-3.5 py-3 font-normal text-ink focus-visible:border-cobalt focus-visible:outline-cobalt focus-visible:outline-offset-0",
-  alert: "max-w-[60ch] rounded-2xl border-l-8 border-punch bg-ink px-[18px] py-3.5 text-chalk",
+    "w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-base font-normal text-fg placeholder:text-muted/70 focus-visible:border-fg/50",
+  alert: "max-w-[60ch] rounded-xl border border-bad/40 bg-bad/15 px-4 py-3 text-fg",
 
-  tag: "rounded-full bg-ink px-3 py-0.5 text-[0.85rem] font-semibold text-chalk",
-  tagBad: "rounded-full bg-punch px-3 py-0.5 text-[0.85rem] font-semibold text-ink",
+  tag: `${tag} border-line bg-surface-2 text-muted`,
+  tagAccent: `${tag} border-accent/40 bg-accent/15 text-fg`,
+  tagGood: `${tag} border-good/40 bg-good/15 text-fg`,
+  tagBad: `${tag} border-bad/40 bg-bad/15 text-fg`,
 };

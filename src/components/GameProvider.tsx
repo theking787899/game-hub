@@ -24,6 +24,9 @@ import {
   type ScoreEntry,
 } from "@/lib/types";
 
+const QUESTION_COUNT_KEY = "gamehub:questionCount";
+export const DEFAULT_QUESTION_COUNT = 10;
+
 type QuestionPayload = {
   question: QuizQuestion;
   questionIndex: number;
@@ -37,8 +40,9 @@ type GameContextValue = {
   room: Room | null;
   error: GameError | null;
   quiz: QuizState | null;
+  questionCount: number;
 
-  createRoom: () => void;
+  createRoom: (questionCount: number) => void;
   joinRoom: (roomId: string) => void;
   leaveRoom: () => void;
 
@@ -77,6 +81,15 @@ export default function GameProvider({
   const [room, setRoom] = useState<Room | null>(null);
   const [error, setError] = useState<GameError | null>(null);
   const [quiz, setQuiz] = useState<QuizState | null>(null);
+
+  // Quantidade de perguntas escolhida no modal de criar sala.
+  // Fica no sessionStorage para sobreviver a um F5 do anfitrião.
+  const [questionCount, setQuestionCount] = useState(DEFAULT_QUESTION_COUNT);
+
+  useEffect(() => {
+    const saved = Number(sessionStorage.getItem(QUESTION_COUNT_KEY));
+    if (saved > 0) setQuestionCount(saved);
+  }, []);
 
   // Socket e eventos recebidos do servidor.
   useEffect(() => {
@@ -255,8 +268,10 @@ export default function GameProvider({
   }, [userId, router]);
 
   // Criar sala.
-  const createRoom = useCallback(() => {
+  const createRoom = useCallback((count: number) => {
     setError(null);
+    setQuestionCount(count);
+    sessionStorage.setItem(QUESTION_COUNT_KEY, String(count));
     getSocket().emit("room:create");
   }, []);
 
@@ -287,8 +302,9 @@ export default function GameProvider({
 
     getSocket().emit("quiz:create", {
       roomId: room.id,
+      questionCount,
     });
-  }, [room]);
+  }, [room, questionCount]);
 
   // Iniciar quiz.
   // Útil caso queira iniciar manualmente em outro componente.
@@ -350,6 +366,7 @@ export default function GameProvider({
         room,
         error,
         quiz,
+        questionCount,
 
         createRoom,
         joinRoom,

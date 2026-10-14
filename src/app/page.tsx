@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import CreateRoomModal from "@/components/CreateRoomModal";
 import { useGame } from "@/components/GameProvider";
 import TopBar from "@/components/TopBar";
 import { errorText, extractRoomId } from "@/lib/types";
@@ -9,8 +10,9 @@ import { ui } from "@/lib/ui";
 
 export default function LobbyPage() {
   const router = useRouter();
-  const { user, authPending, connected, error, createRoom } = useGame();
+  const { user, authPending, connected, error, createRoom, questionCount } = useGame();
   const [code, setCode] = useState("");
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (!authPending && !user) router.replace("/login");
@@ -27,21 +29,28 @@ export default function LobbyPage() {
   return (
     <main className={ui.shell}>
       <TopBar />
+
       <h1 className={ui.h1}>Bora jogar, {user.name.split(" ")[0]}?</h1>
       <p className={ui.lead}>
         Crie uma sala e mande o link para o grupo, ou entre numa sala que alguém já abriu.
       </p>
 
-      <div className="mt-10 grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-5">
-        <section className={`${ui.panel} items-start bg-sun p-8`}>
+      <div className="mt-12 grid gap-5 md:grid-cols-2">
+        <section className={`${ui.card} flex flex-col items-start gap-4 p-7`}>
           <h2 className={ui.h2}>Criar sala</h2>
-          <p className="max-w-[36ch]">Você vira o anfitrião e convida o grupo pelo link da sala.</p>
-          <button className={ui.btnInk} onClick={createRoom} disabled={!connected}>
+          <p className="max-w-[36ch] text-muted">
+            Você vira o anfitrião, escolhe o tamanho do quiz e convida o grupo pelo link.
+          </p>
+          <button
+            className={`${ui.btnPrimary} mt-2`}
+            onClick={() => setCreating(true)}
+            disabled={!connected}
+          >
             Criar sala
           </button>
         </section>
 
-        <form className={`${ui.panel} items-start bg-chalk p-8`} onSubmit={onJoin}>
+        <form className={`${ui.card} flex flex-col items-start gap-4 p-7`} onSubmit={onJoin}>
           <h2 className={ui.h2}>Entrar numa sala</h2>
           <label className={ui.label}>
             Código ou link da sala
@@ -52,7 +61,7 @@ export default function LobbyPage() {
               className={ui.input}
             />
           </label>
-          <button className={ui.btnCobalt} disabled={!code.trim()}>
+          <button className={ui.btnSecondary} disabled={!code.trim()}>
             Entrar na sala
           </button>
         </form>
@@ -63,6 +72,16 @@ export default function LobbyPage() {
           {errorText(error)}
         </p>
       )}
+
+      <CreateRoomModal
+        open={creating}
+        defaultCount={questionCount}
+        onClose={() => setCreating(false)}
+        onConfirm={(n) => {
+          setCreating(false);
+          createRoom(n);
+        }}
+      />
     </main>
   );
 }

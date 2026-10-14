@@ -26,34 +26,39 @@ export default function QuizResults({ players, scores, meId }: Props) {
           : `${top[0].p.name} venceu!`;
 
   return (
-    <section className="flex max-w-[560px] flex-col items-start gap-7">
-      <h1 className={ui.h1}>{title}</h1>
+    <section className="flex max-w-[600px] flex-col items-start gap-8">
+      <div>
+        <p className="font-mono text-sm text-muted">Fim do quiz</p>
+        <h1 className={`${ui.h1} mt-3`}>{title}</h1>
+      </div>
+
       <ol className="flex w-full flex-col gap-2.5">
-        {ranked.map(({ p, score }) => (
-          <li
-            key={p.id}
-            className={`flex items-center gap-3.5 rounded-[22px] px-[18px] py-3.5 text-ink ${
-              best > 0 && score === best ? "bg-sun" : "bg-chalk"
-            }`}
-          >
-            <span className="w-[1.5ch] font-display text-[1.6rem] font-extrabold">
-              {ranked.findIndex((r) => r.score === score) + 1}
-            </span>
-            <Avatar player={p} />
-            <span className="flex-1 font-semibold [overflow-wrap:anywhere]">
-              {p.name}
-              {p.id === meId ? " (você)" : ""}
-            </span>
-            <span
-              className="min-w-[1.5ch] text-right font-display text-[1.6rem] font-extrabold"
-              aria-label={`${score} pontos`}
+        {ranked.map(({ p, score }) => {
+          const leader = best > 0 && score === best;
+          return (
+            <li
+              key={p.id}
+              className={`flex items-center gap-4 rounded-2xl border px-4 py-3.5 motion-safe:animate-rise ${
+                leader ? "border-accent/50 bg-accent/10" : "border-line bg-surface"
+              }`}
             >
-              {score}
-            </span>
-          </li>
-        ))}
+              <span className="w-[2ch] font-mono text-lg text-muted tabular-nums">
+                {ranked.findIndex((r) => r.score === score) + 1}
+              </span>
+              <Avatar player={p} size="md" />
+              <span className="min-w-0 flex-1 text-lg font-medium [overflow-wrap:anywhere]">
+                {p.name}
+                {p.id === meId && <span className="font-normal text-muted"> (você)</span>}
+              </span>
+              <span className="font-mono text-2xl tabular-nums" aria-label={`${score} pontos`}>
+                {score}
+              </span>
+            </li>
+          );
+        })}
       </ol>
-      <button className={ui.btnSun} onClick={closeQuiz}>
+
+      <button className={ui.btnPrimary} onClick={closeQuiz}>
         Voltar para a sala
       </button>
     </section>

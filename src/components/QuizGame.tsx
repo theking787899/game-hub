@@ -7,14 +7,14 @@ import { errorText, findPlayer, isPlayer, type Player } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
 const letters = ["A", "B", "C", "D", "E", "F"];
-const optionColors = ["bg-punch", "bg-sun", "bg-mint", "bg-sky"];
 
 type Tone = "neutral" | "good" | "bad";
 const tones: Record<Tone, string> = {
-  neutral: "bg-deep",
-  good: "bg-mint text-ink",
-  bad: "bg-punch text-ink",
+  neutral: "border-line bg-surface",
+  good: "border-good/40 bg-good/15",
+  bad: "border-bad/40 bg-bad/15",
 };
+const dots: Record<Tone, string> = { neutral: "bg-muted", good: "bg-good", bad: "bg-bad" };
 
 export default function QuizGame({ players, meId }: { players: Player[]; meId: string }) {
   const { quiz, answerQuiz, error } = useGame();
@@ -46,18 +46,38 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
     text = "Resposta enviada. Aguardando o resultado…";
   }
 
+  const current = quiz.index + 1;
+
   return (
-    <section className="grid items-start gap-8 min-[860px]:grid-cols-[1fr_300px]">
+    <section className="grid items-start gap-8 min-[900px]:grid-cols-[1fr_320px]">
       <div className="flex flex-col gap-6">
-        <p className="font-semibold">
-          Pergunta {quiz.index + 1}
-          {quiz.total ? ` de ${quiz.total}` : ""}
-        </p>
-        <h1 className="font-display text-[clamp(1.7rem,4.5vw,2.6rem)] font-extrabold leading-[1.05] tracking-tight">
+        <div className="flex flex-col gap-3">
+          <p className="font-mono text-sm text-muted">
+            Pergunta {current}
+            {quiz.total ? ` de ${quiz.total}` : ""}
+          </p>
+          {quiz.total ? (
+            <div
+              role="progressbar"
+              aria-label="Progresso do quiz"
+              aria-valuemin={1}
+              aria-valuemax={quiz.total}
+              aria-valuenow={current}
+              className="h-1 w-full overflow-hidden rounded-full bg-surface-2"
+            >
+              <div
+                className="h-full rounded-full bg-accent transition-[width] duration-500"
+                style={{ width: `${(current / quiz.total) * 100}%` }}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-normal leading-[1.08] tracking-tight">
           {quiz.question.question}
         </h1>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
+        <div className="grid gap-3 min-[640px]:grid-cols-2">
           {quiz.question.options.map((opt, i) => {
             const picked = quiz.myAnswer === opt;
             return (
@@ -66,11 +86,15 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
                 disabled={locked}
                 aria-pressed={picked}
                 onClick={() => answerQuiz(opt)}
-                className={`flex min-h-[84px] cursor-pointer items-center gap-3.5 rounded-3xl p-5 text-left text-[1.15rem] font-bold text-ink transition-transform enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed ${
-                  optionColors[i % 4]
-                } ${picked ? "outline-4 outline-offset-[3px] outline-chalk" : "disabled:opacity-45"}`}
+                className={`flex min-h-16 cursor-pointer items-center gap-4 rounded-2xl border px-4 py-3.5 text-left text-lg font-medium transition enabled:hover:border-fg/40 enabled:hover:bg-surface-2 disabled:cursor-not-allowed ${
+                  picked ? "border-accent bg-accent/10" : "border-line bg-surface disabled:opacity-50"
+                }`}
               >
-                <span className="grid size-[38px] flex-none place-items-center rounded-full bg-ink font-display text-chalk">
+                <span
+                  className={`grid size-8 flex-none place-items-center rounded-lg font-mono text-sm ${
+                    picked ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted"
+                  }`}
+                >
                   {letters[i]}
                 </span>
                 {opt}
@@ -79,7 +103,8 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
           })}
         </div>
 
-        <p role="status" className={`rounded-2xl px-[18px] py-3.5 font-semibold ${tones[tone]}`}>
+        <p role="status" className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${tones[tone]}`}>
+          <span aria-hidden="true" className={`size-2 flex-none rounded-full ${dots[tone]}`} />
           {text}
         </p>
         {error && (
@@ -89,7 +114,7 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
         )}
       </div>
 
-      <aside className={`${ui.panel} bg-chalk p-8`}>
+      <aside className={`${ui.card} flex flex-col gap-4 p-5`}>
         <h2 className={ui.h2}>Placar</h2>
         <Scoreboard
           players={players}

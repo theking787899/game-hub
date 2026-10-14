@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { useGame } from "@/components/GameProvider";
+import ThemeToggle from "@/components/ThemeToggle";
 import { ui } from "@/lib/ui";
 
 const messages: Record<string, string> = {
@@ -14,7 +15,7 @@ const messages: Record<string, string> = {
   INVALID_EMAIL: "Esse e-mail não parece válido.",
 };
 
-const dots = ["bg-punch", "bg-sun", "bg-mint", "bg-sky", "bg-lilac"];
+const dots = ["bg-p1", "bg-p2", "bg-p3", "bg-p4", "bg-p5"];
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isLogin = mode === "login";
@@ -47,23 +48,27 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   }
 
   return (
-    <main className="mx-auto grid min-h-dvh w-full max-w-[1080px] items-center gap-7 px-5 py-8 md:grid-cols-[1.1fr_1fr] md:gap-12">
-      <div>
-        <div className="flex" aria-hidden="true">
-          {dots.map((color) => (
-            <span
-              key={color}
-              className={`-ml-3.5 size-14 rounded-full border-4 border-cobalt first:ml-0 ${color}`}
-            />
-          ))}
-        </div>
-        <h1 className={`${ui.h1} mt-5`}>Game Hub</h1>
-        <p className={ui.lead}>
-          Crie uma sala, chame o grupo e jogue junto, cada um no seu aparelho.
-        </p>
+    <main className="relative mx-auto grid min-h-dvh w-full max-w-[1080px] items-center gap-10 px-5 py-16 md:grid-cols-[1.1fr_1fr] md:gap-16">
+      <div className="absolute right-5 top-5">
+        <ThemeToggle />
       </div>
 
-      <form className={`${ui.panel} items-start bg-chalk p-9`} onSubmit={onSubmit}>
+      <div>
+        <p className="font-display text-2xl tracking-tight">
+          Game Hub<span className="text-accent">.</span>
+        </p>
+        <h1 className="mt-8 font-display text-[clamp(2.6rem,5.5vw,4rem)] font-normal leading-[1.02] tracking-tight">
+          Jogue com o grupo, cada um no seu aparelho.
+        </h1>
+        <p className={ui.lead}>Crie uma sala, mande o link e comece o quiz em poucos segundos.</p>
+        <div className="mt-8 flex" aria-hidden="true">
+          {dots.map((tone) => (
+            <span key={tone} className={`-ml-2.5 size-10 rounded-full border-2 border-bg first:ml-0 ${tone}`} />
+          ))}
+        </div>
+      </div>
+
+      <form className={`${ui.card} flex flex-col gap-4 p-7 sm:p-8`} onSubmit={onSubmit}>
         <h2 className={ui.h2}>{isLogin ? "Entrar na conta" : "Criar conta"}</h2>
 
         {!isLogin && (
@@ -89,18 +94,21 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         </label>
 
         {error && (
-          <p role="alert" className={`${ui.alert} w-full`}>
+          <p role="alert" className={ui.alert}>
             {error}
           </p>
         )}
 
-        <button className={ui.btnCobalt} disabled={busy}>
+        <button className={`${ui.btnPrimary} mt-1`} disabled={busy}>
           {busy ? "Aguarde…" : isLogin ? "Entrar" : "Criar conta"}
         </button>
 
-        <p className="text-[0.95rem]">
+        <p className="text-sm text-muted">
           {isLogin ? "Ainda não tem conta? " : "Já tem conta? "}
-          <Link href={isLogin ? "/register" : "/login"} className="font-bold text-cobalt">
+          <Link
+            href={isLogin ? "/register" : "/login"}
+            className="font-medium text-fg underline underline-offset-4"
+          >
             {isLogin ? "Criar conta" : "Entrar"}
           </Link>
         </p>

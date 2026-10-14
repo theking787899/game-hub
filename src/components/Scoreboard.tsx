@@ -16,26 +16,23 @@ export default function Scoreboard({ players, scores, meId, winnerId, wrongIds =
     .sort((a, b) => b.score - a.score);
 
   return (
-    <ul aria-label="Placar" className="flex flex-col gap-2">
+    <ul aria-label="Placar" className="flex flex-col gap-1.5">
       {rows.map(({ p, score }) => {
         const won = !!winnerId && isPlayer(p, winnerId);
         const wrong = wrongIds.some((id) => isPlayer(p, id));
         return (
           <li
             key={p.id}
-            className={`flex items-center gap-2.5 rounded-2xl px-2.5 py-2 ${won ? "bg-sun" : ""}`}
+            className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors ${won ? "bg-accent/15" : ""}`}
           >
-            <Avatar player={p} />
-            <span className="flex-1 font-semibold [overflow-wrap:anywhere]">
+            <Avatar player={p} size="sm" />
+            <span className="min-w-0 flex-1 font-medium [overflow-wrap:anywhere]">
               {p.name}
-              {p.id === meId ? " (você)" : ""}
+              {p.id === meId && <span className="font-normal text-muted"> (você)</span>}
             </span>
-            {won && <span className={ui.tag}>Acertou</span>}
+            {won && <span className={ui.tagGood}>Acertou</span>}
             {wrong && <span className={ui.tagBad}>Errou</span>}
-            <span
-              className="min-w-[1.5ch] text-right font-display text-[1.6rem] font-extrabold"
-              aria-label={`${score} pontos`}
-            >
+            <span className="min-w-[2ch] text-right font-mono text-xl tabular-nums" aria-label={`${score} pontos`}>
               {score}
             </span>
           </li>

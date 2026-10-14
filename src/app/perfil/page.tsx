@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
 import TopBar from "@/components/TopBar";
 import { ui } from "@/lib/ui";
@@ -43,9 +44,13 @@ export default function PerfilPage() {
 
   async function copyId() {
     if (!profile) return;
-    await navigator.clipboard.writeText(profile.id);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(profile.id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
+    }
   }
 
   if (authPending || !user) return <main className={ui.center}>Carregando…</main>;
@@ -56,36 +61,29 @@ export default function PerfilPage() {
       <h1 className={ui.h1}>Seu perfil</h1>
 
       {failed ? (
-        <section className="mt-10 flex flex-col items-start gap-5 rounded-[32px] bg-chalk p-9 text-ink">
+        <section className={`${ui.card} mt-10 flex flex-col items-start gap-5 p-7`}>
           <p role="alert">Não foi possível carregar seus dados.</p>
-          <button className={ui.btnCobalt} onClick={load}>
+          <button className={ui.btnSecondary} onClick={load}>
             Tentar de novo
           </button>
         </section>
       ) : !profile ? (
-        <p className="mt-7">Carregando seus dados…</p>
+        <p className="mt-8 text-muted">Carregando seus dados…</p>
       ) : (
-        <section className="mt-10 flex flex-wrap items-center gap-8 rounded-[32px] bg-chalk p-9 text-ink">
-          <div className="grid size-[140px] flex-none place-items-center overflow-hidden rounded-full border-[6px] border-sun bg-punch font-display text-[4rem] font-extrabold">
-            {profile.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.image} alt="" className="size-full object-cover" />
-            ) : (
-              profile.name.trim().charAt(0).toUpperCase()
-            )}
-          </div>
+        <section className={`${ui.card} mt-10 flex flex-wrap items-center gap-6 p-7`}>
+          <Avatar player={{ id: profile.id, name: profile.name, avatar: profile.image }} size="lg" />
 
           <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-5">
-            <h2 className="font-display text-[clamp(2rem,5vw,3rem)] font-extrabold leading-[1.05] tracking-tight [overflow-wrap:anywhere]">
+            <h2 className="font-display text-[clamp(2rem,5vw,3rem)] font-normal leading-[1.05] tracking-tight [overflow-wrap:anywhere]">
               {profile.name}
             </h2>
             <div>
-              <p className="mb-2 text-[0.95rem] font-semibold">Seu ID de jogador</p>
-              <div className="flex flex-wrap items-center gap-3">
-                <code className="break-all rounded-xl bg-[#ebe8ff] px-3 py-2 text-[0.95rem]">
+              <p className="text-sm text-muted">Seu ID de jogador</p>
+              <div className="mt-1.5 flex flex-wrap items-center gap-3">
+                <code className="break-all rounded-lg border border-line bg-surface-2 px-3 py-2 font-mono text-sm">
                   {profile.id}
                 </code>
-                <button className={ui.btnCobalt} onClick={copyId}>
+                <button className={ui.btnSecondary} onClick={copyId}>
                   {copied ? "ID copiado" : "Copiar ID"}
                 </button>
               </div>
@@ -94,8 +92,8 @@ export default function PerfilPage() {
         </section>
       )}
 
-      <p className="mt-7">
-        <Link href="/" className="underline">
+      <p className="mt-8">
+        <Link href="/" className="text-muted underline underline-offset-4 hover:text-fg">
           Voltar ao início
         </Link>
       </p>

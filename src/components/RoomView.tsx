@@ -1,51 +1,30 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
 import QuizGame from "@/components/QuizGame";
 import TopBar from "@/components/TopBar";
 import { errorText } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
-const seatColors = [
-  "bg-punch",
-  "bg-sun",
-  "bg-mint",
-  "bg-sky",
-  "bg-lilac",
-];
-
 export default function RoomView() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const {
-    user,
-    authPending,
-    connected,
-    room,
-    error,
-    quiz,
-    joinRoom,
-    leaveRoom,
-    createQuiz,
-  } = useGame();
+  const { user, authPending, connected, room, error, quiz, questionCount, joinRoom, leaveRoom, createQuiz } =
+    useGame();
 
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!authPending && !user) {
-      router.replace("/login");
-    }
+    if (!authPending && !user) router.replace("/login");
   }, [authPending, user, router]);
 
   // Entra na sala ao abrir o link ou reconectar.
   useEffect(() => {
-    if (connected && user && room?.id !== id) {
-      joinRoom(id);
-    }
+    if (connected && user && room?.id !== id) joinRoom(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connected, user?.id, id]);
 
@@ -56,21 +35,16 @@ export default function RoomView() {
 
   async function copyLink() {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/room/${id}`
-      );
-
+      await navigator.clipboard.writeText(`${window.location.origin}/room/${id}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // A cópia pode falhar se o navegador não permitir acesso à área de transferência.
+      // O navegador pode bloquear o acesso à área de transferência.
       setCopied(false);
     }
   }
 
-  if (authPending || !user) {
-    return <main className={ui.center}>Carregando…</main>;
-  }
+  if (authPending || !user) return <main className={ui.center}>Carregando…</main>;
 
   const current = room?.id === id ? room : null;
 
@@ -78,15 +52,12 @@ export default function RoomView() {
     return (
       <main className={ui.shell}>
         <TopBar />
-
         <h1 className={ui.h1}>Não deu para entrar na sala</h1>
-
         <p role="alert" className={`${ui.alert} mt-6`}>
           {errorText(error)}
         </p>
-
         <p className="mt-6">
-          <button className={ui.btnSun} onClick={leave}>
+          <button className={ui.btnPrimary} onClick={leave}>
             Voltar ao início
           </button>
         </p>
@@ -94,15 +65,9 @@ export default function RoomView() {
     );
   }
 
-  if (!current) {
-    return (
-      <main className={ui.center}>
-        Entrando na sala…
-      </main>
-    );
-  }
+  if (!current) return <main className={ui.center}>Entrando na sala…</main>;
 
-  // Se o quiz começou, exibe a interface do jogo.
+  // Se o quiz começou, mostra o jogo.
   if (quiz) {
     return (
       <main className={ui.shell}>
@@ -112,16 +77,9 @@ export default function RoomView() {
     );
   }
 
-  const seats = Array.from(
-    { length: current.maxPlayer },
-    (_, i) => current.players[i] ?? null
-  );
-
+  const seats = Array.from({ length: current.maxPlayer }, (_, i) => current.players[i] ?? null);
   const full = current.players.length >= current.maxPlayer;
-
-  const isHost = !!current.players.find(
-    (player) => player.id === user.id
-  )?.host;
+  const isHost = !!current.players.find((p) => p.id === user.id)?.host;
 
   return (
     <main className={ui.shell}>
@@ -129,98 +87,74 @@ export default function RoomView() {
 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <h1 className={ui.h1}>Sala de espera</h1>
-
-        <button className={ui.btnGhost} onClick={leave}>
+        <button className={ui.btnSecondary} onClick={leave}>
           Sair da sala
         </button>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-center gap-3">
-        <code className="break-all rounded-[14px] bg-deep px-4 py-2.5 text-[0.95rem]">
-          {current.id}
-        </code>
-
-        <button className={ui.btnSun} onClick={copyLink}>
+      <div className={`${ui.card} mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 p-4`}>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm text-muted">Código da sala</p>
+          <code className="mt-0.5 block break-all font-mono text-sm">{current.id}</code>
+        </div>
+        <button className={ui.btnSecondary} onClick={copyLink}>
           {copied ? "Link copiado" : "Copiar link"}
         </button>
       </div>
 
-      <p className="mt-10 font-semibold" aria-live="polite">
-        {current.players.length} de {current.maxPlayer} jogadores.{" "}
-        {full
-          ? "A sala está cheia."
-          : "Mande o link para chamar o resto do grupo."}
+      <div className="mt-12 flex items-baseline gap-3">
+        <h2 className={ui.h2}>Jogadores</h2>
+        <span className="font-mono text-sm text-muted" aria-live="polite">
+          {current.players.length}/{current.maxPlayer}
+        </span>
+      </div>
+      <p className="mt-2 text-muted">
+        {full ? "A sala está cheia." : "Mande o link para chamar o resto do grupo."}
       </p>
 
-      <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-5">
-        {seats.map((player, i) =>
-          player ? (
+      <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+        {seats.map((p, i) =>
+          p ? (
             <li
-              key={player.id}
-              className={`flex min-h-[210px] flex-col items-center justify-center gap-2.5 rounded-[32px] p-5 text-center text-ink motion-safe:animate-pop ${
-                seatColors[i % seatColors.length]
-              } ${i % 2 === 0 ? "-rotate-2" : "rotate-[1.5deg]"}`}
+              key={p.id}
+              className={`${ui.card} flex items-center gap-4 p-4 motion-safe:animate-rise`}
             >
-              <div className="grid size-[84px] place-items-center overflow-hidden rounded-full bg-chalk font-display text-[2.4rem] font-extrabold">
-                {player.avatar?.startsWith("http") ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={player.avatar}
-                    alt=""
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  player.name.trim().charAt(0).toUpperCase()
-                )}
+              <Avatar player={p} size="md" />
+              <div className="min-w-0">
+                <p className="font-medium [overflow-wrap:anywhere]">{p.name}</p>
+                <p className="mt-1 flex flex-wrap gap-1.5">
+                  <span className={ui.tag}>{p.host ? "Anfitrião" : "Jogador"}</span>
+                  {p.id === user.id && <span className={ui.tagAccent}>Você</span>}
+                </p>
               </div>
-
-              <span className="font-display text-xl font-extrabold leading-tight [overflow-wrap:anywhere]">
-                {player.name}
-              </span>
-
-              <span className="flex flex-wrap justify-center gap-1.5">
-                <span className={ui.tag}>
-                  {player.host ? "Anfitrião" : "Jogador"}
-                </span>
-
-                {player.id === user.id && (
-                  <span className={ui.tag}>Você</span>
-                )}
-              </span>
             </li>
           ) : (
             <li
               key={`vazio-${i}`}
-              className="flex min-h-[210px] items-center justify-center rounded-[32px] border-[3px] border-dashed border-chalk/55 p-5 text-center"
+              className="flex items-center gap-4 rounded-2xl border border-dashed border-line p-4 text-muted"
             >
+              <span className="size-12 flex-none rounded-full border border-dashed border-line" />
               Vaga livre
             </li>
-          )
+          ),
         )}
       </ul>
 
-      <section
-        className={`${ui.panel} mt-8 max-w-[520px] items-start bg-sun p-8`}
-      >
+      <section className={`${ui.card} mt-12 flex max-w-[560px] flex-col items-start gap-4 p-7`}>
         <h2 className={ui.h2}>Quiz</h2>
 
         {isHost ? (
           <>
-            <p className="max-w-[36ch]">
-              Perguntas de conhecimentos gerais. O primeiro a acertar ganha
-              o ponto.
+            <p className="max-w-[40ch] text-muted">
+              <span className="font-mono text-fg">{questionCount}</span> perguntas de conhecimentos
+              gerais. O primeiro a acertar cada uma ganha o ponto.
             </p>
-
-            <button
-              className={ui.btnInk}
-              onClick={createQuiz}
-              disabled={!connected}
-            >
+            <button className={`${ui.btnPrimary} mt-1`} onClick={createQuiz} disabled={!connected}>
               Começar quiz
             </button>
           </>
         ) : (
-          <p>Aguardando o anfitrião começar o quiz.</p>
+          <p className="text-muted">Aguardando o anfitrião começar o quiz.</p>
         )}
       </section>
 

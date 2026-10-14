@@ -1,42 +1,80 @@
 @import "tailwindcss";
 
+/* Tema escuro por classe (.dark no <html>), com a preferência do sistema como padrão. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --color-cobalt: #2a3fd8;
-  --color-deep: #1b2a9c;
-  --color-chalk: #f7f5ff;
-  --color-ink: #15123b;
-  --color-sun: #ffd23f;
-  --color-punch: #ff5a8a;
-  --color-mint: #46dba9;
-  --color-sky: #7cc4ff;
-  --color-lilac: #b79cff;
+  --animate-rise: rise 0.35s ease-out both;
 
-  --animate-pop: pop 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
-
-  @keyframes pop {
+  @keyframes rise {
     from {
-      transform: scale(0.7);
+      transform: translateY(6px);
       opacity: 0;
     }
     to {
-      transform: scale(1);
+      transform: translateY(0);
       opacity: 1;
     }
   }
+
+  /* Tons discretos só para os avatares dos jogadores. */
+  --color-p1: oklch(0.8 0.1 25);
+  --color-p2: oklch(0.84 0.1 85);
+  --color-p3: oklch(0.8 0.1 160);
+  --color-p4: oklch(0.79 0.09 235);
+  --color-p5: oklch(0.79 0.1 305);
 }
 
-/* As fontes vêm do next/font (variáveis definidas no layout). */
+/* Cores semânticas: trocam sozinhas entre claro e escuro. */
 @theme inline {
-  --font-display: var(--font-bricolage), system-ui, sans-serif;
-  --font-sans: var(--font-figtree), system-ui, sans-serif;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-display: var(--font-instrument), ui-serif, Georgia, serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
 }
 
-/* Dentro do @layer base para que as classes do Tailwind (ex.: focus-visible:outline-cobalt)
-   consigam sobrescrever. Anel em duas cores: aparece no azul, no giz e no amarelo. */
+:root {
+  color-scheme: light;
+  --bg: #f4f4f6;
+  --surface: #ffffff;
+  --surface-2: #f1f1f4;
+  --line: #dedfe5;
+  --fg: #15161a;
+  --muted: #5c5e6b;
+  --accent: #ffbc2f;
+  --accent-fg: #1b1304;
+  --good: #1fa971;
+  --bad: #e0455a;
+}
+
+.dark {
+  color-scheme: dark;
+  --bg: #0e0f12;
+  --surface: #16171c;
+  --surface-2: #1e2027;
+  --line: #2b2d36;
+  --fg: #eceef2;
+  --muted: #9a9dab;
+  --accent: #ffbc2f;
+  --accent-fg: #1b1304;
+  --good: #38d39a;
+  --bad: #ff6b81;
+}
+
 @layer base {
+  /* Anel de foco na cor do texto: tem contraste nos dois temas. */
   :focus-visible {
-    outline: 3px solid var(--color-sun);
-    outline-offset: 3px;
-    box-shadow: 0 0 0 3px var(--color-ink);
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
   }
 }
