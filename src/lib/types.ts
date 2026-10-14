@@ -40,6 +40,9 @@ export function errorText(e: GameError): string {
       return "Sem conexão com o servidor de jogos. Confira se ele está rodando.";
     case "INTERNAL_ERROR":
       return "Algo deu errado no servidor. Tente de novo.";
+
+    case "ROOM_IN_GAME":
+      return "A Sala está em jogo";
     default:
       return e.message;
   }
