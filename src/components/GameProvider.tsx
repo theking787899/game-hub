@@ -272,7 +272,8 @@ export default function GameProvider({
     setError(null);
     setQuestionCount(count);
     sessionStorage.setItem(QUESTION_COUNT_KEY, String(count));
-    getSocket().emit("room:create");
+    // A quantidade de perguntas vai junto com a criação da sala.
+    getSocket().emit("room:create", { questionCount: count });
   }, []);
 
   // Entrar em sala.
@@ -302,7 +303,8 @@ export default function GameProvider({
 
     getSocket().emit("quiz:create", {
       roomId: room.id,
-      questionCount,
+      // Prefere o valor guardado na sala pelo servidor; senão usa o escolhido no modal.
+      questionCount: room.questionCount ?? questionCount,
     });
   }, [room, questionCount]);
 

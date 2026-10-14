@@ -11,6 +11,8 @@ export type Room = {
   maxPlayer: number;
   status: string;
   players: Player[];
+  // Quantidade de perguntas escolhida ao criar a sala (se o servidor enviar).
+  questionCount?: number;
 };
 
 export type GameError = { code: string; message: string };
@@ -21,13 +23,20 @@ export type RawRoom = {
   status?: string;
   host?: Player;
   players?: Player[] | Record<string, Player>;
+  questionCount?: number;
 };
 
 // Um Map serializado vira {}, então sem players na lista usamos o anfitrião.
 export function normalizeRoom(raw: RawRoom): Room {
   const list = Array.isArray(raw.players) ? raw.players : Object.values(raw.players ?? {});
   const players = list.length > 0 ? list : raw.host ? [raw.host] : [];
-  return { id: raw.id, maxPlayer: raw.maxPlayer ?? 5, status: raw.status ?? "LOBBY", players };
+  return {
+    id: raw.id,
+    maxPlayer: raw.maxPlayer ?? 5,
+    status: raw.status ?? "LOBBY",
+    players,
+    questionCount: raw.questionCount,
+  };
 }
 
 export function errorText(e: GameError): string {

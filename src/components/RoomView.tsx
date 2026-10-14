@@ -80,6 +80,7 @@ export default function RoomView() {
   const seats = Array.from({ length: current.maxPlayer }, (_, i) => current.players[i] ?? null);
   const full = current.players.length >= current.maxPlayer;
   const isHost = !!current.players.find((p) => p.id === user.id)?.host;
+  const count = current.questionCount ?? questionCount;
 
   return (
     <main className={ui.shell}>
@@ -146,7 +147,7 @@ export default function RoomView() {
         {isHost ? (
           <>
             <p className="max-w-[40ch] text-muted">
-              <span className="font-mono text-fg">{questionCount}</span> perguntas de conhecimentos
+              <span className="font-mono text-fg">{count}</span> perguntas de conhecimentos
               gerais. O primeiro a acertar cada uma ganha o ponto.
             </p>
             <button className={`${ui.btnPrimary} mt-1`} onClick={createQuiz} disabled={!connected}>
@@ -154,7 +155,10 @@ export default function RoomView() {
             </button>
           </>
         ) : (
-          <p className="text-muted">Aguardando o anfitrião começar o quiz.</p>
+          <p className="text-muted">
+            Aguardando o anfitrião começar o quiz
+            {current.questionCount ? ` (${current.questionCount} perguntas)` : ""}.
+          </p>
         )}
       </section>
 
