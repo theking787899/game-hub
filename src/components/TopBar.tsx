@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -8,12 +9,25 @@ import { ui } from "@/lib/ui";
 
 export default function TopBar() {
   const { user, connected, signOut } = useGame();
+  const pathname = usePathname();
+  const onRanking = pathname === "/ranking";
 
   return (
-    <header className="mb-12 flex items-center justify-between gap-3 border-b border-line pb-4">
-      <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight">
-        Game Hub<span className="text-accent">.</span>
-      </Link>
+    <header className="mb-12 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b border-line pb-4">
+      <div className="flex items-center gap-6">
+        <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight">
+          Game Hub<span className="text-accent">.</span>
+        </Link>
+        <Link
+          href="/ranking"
+          aria-current={onRanking ? "page" : undefined}
+          className={`text-sm font-medium underline-offset-4 transition hover:text-fg ${
+            onRanking ? "text-fg underline" : "text-muted"
+          }`}
+        >
+          Ranking
+        </Link>
+      </div>
 
       <div className="flex items-center gap-2">
         <span role="status" className="mr-1 flex items-center gap-2 text-sm text-muted">
