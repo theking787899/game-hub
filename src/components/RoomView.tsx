@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
 import QuizGame from "@/components/QuizGame";
+import QuizTypeModal from "@/components/QuizTypeModal";
 import TopBar from "@/components/TopBar";
 import { errorText } from "@/lib/types";
 import { ui } from "@/lib/ui";
@@ -17,6 +18,7 @@ export default function RoomView() {
     useGame();
 
   const [copied, setCopied] = useState(false);
+  const [choosingType, setChoosingType] = useState(false);
 
   useEffect(() => {
     if (!authPending && !user) router.replace("/login");
@@ -150,7 +152,7 @@ export default function RoomView() {
               <span className="font-mono text-fg">{count}</span> perguntas de conhecimentos
               gerais. O primeiro a acertar cada uma ganha o ponto.
             </p>
-            <button className={`${ui.btnPrimary} mt-1`} onClick={createQuiz} disabled={!connected}>
+            <button className={`${ui.btnPrimary} mt-1`} onClick={() => setChoosingType(true)} disabled={!connected}>
               Começar quiz
             </button>
           </>
@@ -167,6 +169,16 @@ export default function RoomView() {
           {errorText(error)}
         </p>
       )}
+
+      <QuizTypeModal
+        open={choosingType}
+        questionCount={count}
+        onClose={() => setChoosingType(false)}
+        onConfirm={(gameType) => {
+          setChoosingType(false);
+          createQuiz(gameType);
+        }}
+      />
     </main>
   );
 }

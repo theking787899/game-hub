@@ -11,6 +11,7 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import type { GameType } from "@/lib/gameTypes";
 import { getSocket } from "@/lib/socket";
 
 import {
@@ -46,7 +47,7 @@ type GameContextValue = {
   joinRoom: (roomId: string) => void;
   leaveRoom: () => void;
 
-  createQuiz: () => void;
+  createQuiz: (gameType: GameType) => void;
   startQuiz: () => void;
   answerQuiz: (answer: string) => void;
   closeQuiz: () => void;
@@ -296,7 +297,7 @@ export default function GameProvider({
   }, [room]);
 
   // Criar quiz no servidor.
-  const createQuiz = useCallback(() => {
+  const createQuiz = useCallback((gameType: GameType) => {
     if (!room) return;
 
     setError(null);
@@ -305,6 +306,7 @@ export default function GameProvider({
       roomId: room.id,
       // Prefere o valor guardado na sala pelo servidor; senão usa o escolhido no modal.
       questionCount: room.questionCount ?? questionCount,
+      gameType,
     });
   }, [room, questionCount]);
 

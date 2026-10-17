@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ui } from "@/lib/ui";
 
-const options = [5, 10, 15, 20];
+const options = [10, 15, 20];
 
 type Props = {
   open: boolean;
