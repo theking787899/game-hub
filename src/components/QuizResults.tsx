@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
+import { playSfx } from "@/lib/sound";
 import { scoreOf, type Player } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
@@ -15,6 +17,15 @@ export default function QuizResults({ players, scores, meId }: Props) {
     .sort((a, b) => b.score - a.score);
   const best = ranked[0]?.score ?? 0;
   const top = ranked.filter((r) => r.score === best);
+
+  // Toca uma vez ao abrir o resultado: fanfarra se você está entre os primeiros.
+  const iWon = best > 0 && top.some((r) => r.p.id === meId);
+  const played = useRef(false);
+  useEffect(() => {
+    if (played.current) return;
+    played.current = true;
+    playSfx(iWon ? "win" : "end");
+  }, [iWon]);
 
   const title =
     best === 0

@@ -2,8 +2,10 @@
 
 import { useGame } from "@/components/GameProvider";
 import QuizResults from "@/components/QuizResults";
+import QuizSounds from "@/components/QuizSounds";
+import RoundResultModal from "@/components/RoundResultModal";
 import Scoreboard from "@/components/Scoreboard";
-import { errorText, findPlayer, isPlayer, type Player } from "@/lib/types";
+import { errorText, findPlayer, isPlayer, scoreOf, type Player } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
 const letters = ["A", "B", "C", "D", "E", "F"];
@@ -48,8 +50,17 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
 
   const current = quiz.index + 1;
 
+  // Como a pergunta terminou (null enquanto está aberta).
+  const roundState = iWon ? "me" : quiz.winnerId ? "other" : quiz.roundOver ? "nobody" : null;
+
   return (
     <section className="grid items-start gap-8 min-[900px]:grid-cols-[1fr_320px]">
+      <QuizSounds index={quiz.index} event={roundState} wrong={iWasWrong && !quiz.roundOver} />
+      <RoundResultModal
+        state={roundState}
+        winner={winner}
+        score={winner ? scoreOf(winner, quiz.scores) : 0}
+      />
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <p className="font-mono text-sm text-muted">

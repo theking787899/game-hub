@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
+import SoundToggle from "@/components/SoundToggle";
 import ThemeToggle from "@/components/ThemeToggle";
 import { ui } from "@/lib/ui";
 
@@ -49,6 +50,7 @@ export default function TopBar() {
           </Link>
         )}
 
+        <SoundToggle />
         <ThemeToggle />
         <button className={ui.btnGhost} onClick={signOut}>
           Sair
