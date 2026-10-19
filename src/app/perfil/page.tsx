@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Avatar from "@/components/Avatar";
 import { useGame } from "@/components/GameProvider";
 import TopBar from "@/components/TopBar";
+import UserStats from "@/components/UserStats";
 import { ui } from "@/lib/ui";
 
 // Rota do servidor (o Next encaminha para o Express, ver next.config.mjs).
@@ -92,7 +93,11 @@ export default function PerfilPage() {
         </section>
       )}
 
-      <p className="mt-8">
+      <div className="mt-14">
+        <UserStats meId={user.id} />
+      </div>
+
+      <p className="mt-12">
         <Link href="/" className="text-muted underline underline-offset-4 hover:text-fg">
           Voltar ao início
         </Link>
