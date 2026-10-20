@@ -4,6 +4,9 @@ export type Player = {
   name: string;
   avatar?: string | null;
   host?: boolean;
+  // Estado "pronto", enviado pelo servidor dentro do room:updated.
+  ready?: boolean;
+  isReady?: boolean;
 };
 
 export type Room = {
@@ -101,4 +104,9 @@ export function findPlayer(players: Player[], playerId: string): Player | undefi
 
 export function scoreOf(p: Player, scores: Record<string, number>): number {
   return scores[p.connectionId ?? ""] ?? scores[p.id] ?? 0;
+}
+
+// O servidor pode chamar o campo de ready ou isReady: aceitamos os dois.
+export function isReady(p: Player): boolean {
+  return p.ready ?? p.isReady ?? false;
 }

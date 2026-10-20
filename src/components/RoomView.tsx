@@ -7,14 +7,14 @@ import { useGame } from "@/components/GameProvider";
 import QuizGame from "@/components/QuizGame";
 import QuizTypeModal from "@/components/QuizTypeModal";
 import TopBar from "@/components/TopBar";
-import { errorText } from "@/lib/types";
+import { errorText, isReady } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
 export default function RoomView() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { user, authPending, connected, room, error, quiz, questionCount, joinRoom, leaveRoom, createQuiz } =
+  const { user, authPending, connected, room, error, quiz, questionCount, joinRoom, leaveRoom, createQuiz, toggleReady } =
     useGame();
 
   const [copied, setCopied] = useState(false);
@@ -81,7 +81,11 @@ export default function RoomView() {
 
   const seats = Array.from({ length: current.maxPlayer }, (_, i) => current.players[i] ?? null);
   const full = current.players.length >= current.maxPlayer;
-  const isHost = !!current.players.find((p) => p.id === user.id)?.host;
+  const me = current.players.find((p) => p.id === user.id);
+  const isHost = !!me?.host;
+  const meReady = !!me && isReady(me);
+  const readyCount = current.players.filter((p) => isReady(p)).length;
+  const allReady = readyCount === current.players.length;
   const count = current.questionCount ?? questionCount;
 
   return (
@@ -105,14 +109,27 @@ export default function RoomView() {
         </button>
       </div>
 
-      <div className="mt-12 flex items-baseline gap-3">
-        <h2 className={ui.h2}>Jogadores</h2>
-        <span className="font-mono text-sm text-muted" aria-live="polite">
-          {current.players.length}/{current.maxPlayer}
-        </span>
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <div className="flex items-baseline gap-3">
+          <h2 className={ui.h2}>Jogadores</h2>
+          <span className="font-mono text-sm text-muted">
+            {current.players.length}/{current.maxPlayer}
+          </span>
+        </div>
+        <button
+          className={meReady ? ui.btnSecondary : ui.btnPrimary}
+          onClick={toggleReady}
+          disabled={!connected}
+          aria-pressed={meReady}
+        >
+          {meReady ? "Cancelar pronto" : "Estou pronto"}
+        </button>
       </div>
-      <p className="mt-2 text-muted">
-        {full ? "A sala está cheia." : "Mande o link para chamar o resto do grupo."}
+      <p className="mt-2 text-muted" aria-live="polite">
+        <span className="font-mono text-fg">
+          {readyCount}/{current.players.length}
+        </span>{" "}
+        prontos. {full ? "A sala está cheia." : "Mande o link para chamar o resto do grupo."}
       </p>
 
       <ul className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -120,7 +137,9 @@ export default function RoomView() {
           p ? (
             <li
               key={p.id}
-              className={`${ui.card} flex items-center gap-4 p-4 motion-safe:animate-rise`}
+              className={`flex items-center gap-4 rounded-2xl border bg-surface p-4 transition-colors motion-safe:animate-rise ${
+                isReady(p) ? "border-good/50" : "border-line"
+              }`}
             >
               <Avatar player={p} size="md" />
               <div className="min-w-0">
@@ -128,6 +147,7 @@ export default function RoomView() {
                 <p className="mt-1 flex flex-wrap gap-1.5">
                   <span className={ui.tag}>{p.host ? "Anfitrião" : "Jogador"}</span>
                   {p.id === user.id && <span className={ui.tagAccent}>Você</span>}
+                  {isReady(p) && <span className={ui.tagGood}>Pronto</span>}
                 </p>
               </div>
             </li>
@@ -152,6 +172,7 @@ export default function RoomView() {
               <span className="font-mono text-fg">{count}</span> perguntas de conhecimentos
               gerais. O primeiro a acertar cada uma ganha o ponto.
             </p>
+            {!allReady && <p className="text-sm text-muted">Nem todos estão prontos ainda.</p>}
             <button className={`${ui.btnPrimary} mt-1`} onClick={() => setChoosingType(true)} disabled={!connected}>
               Começar quiz
             </button>

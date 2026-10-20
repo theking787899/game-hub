@@ -48,6 +48,7 @@ type GameContextValue = {
   leaveRoom: () => void;
 
   createQuiz: (gameType: GameType) => void;
+  toggleReady: () => void;
   startQuiz: () => void;
   answerQuiz: (answer: string) => void;
   closeQuiz: () => void;
@@ -296,6 +297,18 @@ export default function GameProvider({
     setError(null);
   }, [room]);
 
+  // Marcar (ou desmarcar) o jogador como pronto.
+  // O novo estado volta para todos pelo room:updated.
+  const toggleReady = useCallback(() => {
+    if (!room) return;
+
+    setError(null);
+
+    getSocket().emit("room:ready", {
+      roomId: room.id,
+    });
+  }, [room]);
+
   // Criar quiz no servidor.
   const createQuiz = useCallback((gameType: GameType) => {
     if (!room) return;
@@ -377,6 +390,7 @@ export default function GameProvider({
         leaveRoom,
 
         createQuiz,
+        toggleReady,
         startQuiz,
         answerQuiz,
         closeQuiz,
