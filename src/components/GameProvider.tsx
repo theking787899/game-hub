@@ -32,6 +32,7 @@ type QuestionPayload = {
   questionIndex: number;
   total?: number;
   endsAt: number;
+  remainingMs: number;
 };
 
 type GameContextValue = {
@@ -170,7 +171,7 @@ export default function GameProvider({
           winnerId: null,
           wrongIds: [],
           roundOver: false,
-          endsAt: payload.endsAt,
+          endsAt: Date.now() + payload.remainingMs,
           timeUp: false,
           scores: {},
         });
@@ -191,7 +192,7 @@ export default function GameProvider({
             winnerId: null,
             wrongIds: [],
             roundOver: false,
-            endsAt: payload.endsAt,
+            endsAt: Date.now() + payload.remainingMs,
             timeUp: false,
           };
         });
