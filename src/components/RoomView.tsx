@@ -7,7 +7,7 @@ import { useGame } from "@/components/GameProvider";
 import QuizGame from "@/components/QuizGame";
 import QuizTypeModal from "@/components/QuizTypeModal";
 import TopBar from "@/components/TopBar";
-import { errorText, isReady } from "@/lib/types";
+import { errorText } from "@/lib/types";
 import { ui } from "@/lib/ui";
 
 export default function RoomView() {
@@ -83,8 +83,8 @@ export default function RoomView() {
   const full = current.players.length >= current.maxPlayer;
   const me = current.players.find((p) => p.id === user.id);
   const isHost = !!me?.host;
-  const meReady = !!me && isReady(me);
-  const readyCount = current.players.filter((p) => isReady(p)).length;
+  const meReady = !!me?.ready;
+  const readyCount = current.players.filter((p) => p.ready).length;
   const allReady = readyCount === current.players.length;
   const count = current.questionCount ?? questionCount;
 
@@ -138,7 +138,7 @@ export default function RoomView() {
             <li
               key={p.id}
               className={`flex items-center gap-4 rounded-2xl border bg-surface p-4 transition-colors motion-safe:animate-rise ${
-                isReady(p) ? "border-good/50" : "border-line"
+                p.ready ? "border-good/50" : "border-line"
               }`}
             >
               <Avatar player={p} size="md" />
@@ -147,7 +147,7 @@ export default function RoomView() {
                 <p className="mt-1 flex flex-wrap gap-1.5">
                   <span className={ui.tag}>{p.host ? "Anfitrião" : "Jogador"}</span>
                   {p.id === user.id && <span className={ui.tagAccent}>Você</span>}
-                  {isReady(p) && <span className={ui.tagGood}>Pronto</span>}
+                  {p.ready && <span className={ui.tagGood}>Pronto</span>}
                 </p>
               </div>
             </li>
