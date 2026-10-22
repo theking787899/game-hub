@@ -8,9 +8,18 @@ export const QUESTION_TIME_MS = 15_000;
 
 // Segundos que faltam até endsAt (timestamp em ms do Date.now() do servidor).
 // Nunca passa de 15 nem fica negativo.
-export function secondsLeft(endsAt: number, now: number = Date.now()): number {
-  const seconds = Math.ceil((endsAt - now) / 1000);
-  return Math.min(QUESTION_TIME_MS / 1000, Math.max(0, seconds));
+export function secondsLeft(
+  endsAt: number,
+  now: number = Date.now(),
+): number {
+  const remainingMs = endsAt - now;
+
+  if (remainingMs <= 0) return 0;
+
+  return Math.min(
+    15,
+    Math.ceil(remainingMs / 1000),
+  );
 }
 
 export function formatClock(seconds: number): string {
