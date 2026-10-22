@@ -3,6 +3,7 @@
 import { useGame } from "@/components/GameProvider";
 import QuizResults from "@/components/QuizResults";
 import QuizSounds from "@/components/QuizSounds";
+import QuizTimer from "@/components/QuizTimer";
 import RoundResultModal from "@/components/RoundResultModal";
 import Scoreboard from "@/components/Scoreboard";
 import { errorText, findPlayer, isPlayer, scoreOf, type Player } from "@/lib/types";
@@ -30,7 +31,8 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
   const winner = quiz.winnerId ? findPlayer(players, quiz.winnerId) : undefined;
   const iWon = !!me && !!quiz.winnerId && isPlayer(me, quiz.winnerId);
   const iWasWrong = !!me && quiz.wrongIds.some((id) => isPlayer(me, id));
-  const locked = quiz.myAnswer !== null || quiz.roundOver;
+  // Trava por resposta já enviada, pergunta encerrada ou quiz:time-up do servidor.
+  const locked = quiz.myAnswer !== null || quiz.roundOver || quiz.timeUp;
 
   let tone: Tone = "neutral";
   let text = "Escolha uma resposta. Só o primeiro a acertar ganha o ponto.";
@@ -41,6 +43,9 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
     text = `${winner?.name ?? "Alguém"} acertou primeiro. Próxima pergunta em instantes.`;
   } else if (quiz.roundOver) {
     text = "Ninguém acertou. Próxima pergunta em instantes.";
+  } else if (quiz.timeUp) {
+    tone = "bad";
+    text = "O tempo acabou para esta pergunta.";
   } else if (iWasWrong) {
     tone = "bad";
     text = "Resposta errada. Você não pode tentar de novo nesta pergunta.";
@@ -63,10 +68,18 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
       />
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
-          <p className="font-mono text-sm text-muted">
-            Pergunta {current}
-            {quiz.total ? ` de ${quiz.total}` : ""}
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-mono text-sm text-muted">
+              Pergunta {current}
+              {quiz.total ? ` de ${quiz.total}` : ""}
+            </p>
+            <QuizTimer
+              key={quiz.endsAt ?? quiz.index}
+              endsAt={quiz.endsAt}
+              stopped={quiz.roundOver || quiz.timeUp}
+              timeUp={quiz.timeUp}
+            />
+          </div>
           {quiz.total ? (
             <div
               role="progressbar"

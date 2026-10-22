@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -32,6 +31,7 @@ type QuestionPayload = {
   question: QuizQuestion;
   questionIndex: number;
   total?: number;
+  endsAt: number;
 };
 
 type GameContextValue = {
@@ -170,6 +170,8 @@ export default function GameProvider({
           winnerId: null,
           wrongIds: [],
           roundOver: false,
+          endsAt: payload.endsAt,
+          timeUp: false,
           scores: {},
         });
       },
@@ -189,6 +191,8 @@ export default function GameProvider({
             winnerId: null,
             wrongIds: [],
             roundOver: false,
+            endsAt: payload.endsAt,
+            timeUp: false,
           };
         });
       },
@@ -221,6 +225,18 @@ export default function GameProvider({
         });
       },
 
+      // Tempo da pergunta esgotado. O servidor é quem decide: o front só reflete.
+      "quiz:time-up": (payload: { questionIndex: number }) => {
+        setQuiz((currentQuiz) => {
+          // Ignora aviso atrasado de uma pergunta que já passou.
+          if (!currentQuiz || currentQuiz.index !== payload.questionIndex) {
+            return currentQuiz;
+          }
+
+          return { ...currentQuiz, timeUp: true };
+        });
+      },
+
       // Fim do quiz.
       "quiz:finished": (payload: { scores: ScoreEntry[] }) => {
         setQuiz((currentQuiz) => {
@@ -229,6 +245,7 @@ export default function GameProvider({
           return {
             ...currentQuiz,
             phase: "finished",
+            endsAt: null,
             scores: Object.fromEntries(
               payload.scores.map((score) => [
                 score.playerId,
