@@ -1,8 +1,8 @@
 // Rotas do servidor (o Next encaminha para o Express, ver next.config.mjs).
 const base = process.env.NEXT_PUBLIC_SOCKET_URL;
 
-const FRIENDS_URL = `${base}/api/user/friends`;
-const INVITATIONS_URL = `${base}/api/user/friends/invitations`;
+const FRIENDS_URL = `${base}/user/friends`;
+const INVITATIONS_URL = `${base}/user/friends/invitations`;
 
 export type Friend = { id: string; name: string; image: string | null };
 
