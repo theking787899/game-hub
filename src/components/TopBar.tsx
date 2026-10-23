@@ -8,26 +8,36 @@ import SoundToggle from "@/components/SoundToggle";
 import ThemeToggle from "@/components/ThemeToggle";
 import { ui } from "@/lib/ui";
 
+const links = [
+  { href: "/ranking", label: "Ranking" },
+  { href: "/amigos", label: "Amigos" },
+];
+
 export default function TopBar() {
   const { user, connected, signOut } = useGame();
   const pathname = usePathname();
-  const onRanking = pathname === "/ranking";
 
   return (
     <header className="mb-12 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b border-line pb-4">
-      <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
         <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight">
           Game Hub<span className="text-accent">.</span>
         </Link>
-        <Link
-          href="/ranking"
-          aria-current={onRanking ? "page" : undefined}
-          className={`text-sm font-medium underline-offset-4 transition hover:text-fg ${
-            onRanking ? "text-fg underline" : "text-muted"
-          }`}
-        >
-          Ranking
-        </Link>
+        {links.map((l) => {
+          const active = pathname === l.href;
+          return (
+            <Link
+              key={l.href}
+              href={l.href}
+              aria-current={active ? "page" : undefined}
+              className={`text-sm font-medium underline-offset-4 transition hover:text-fg ${
+                active ? "text-fg underline" : "text-muted"
+              }`}
+            >
+              {l.label}
+            </Link>
+          );
+        })}
       </div>
 
       <div className="flex items-center gap-2">
