@@ -10,7 +10,7 @@ import UserStats from "@/components/UserStats";
 import { ui } from "@/lib/ui";
 
 // Rota do servidor (o Next encaminha para o Express, ver next.config.mjs).
-const USER_URL = `${process.env.NEXT_PUBLIC_SOCKET_URL}/user`;
+const USER_URL = "/api/user";
 
 type Profile = { id: string; name: string; image?: string | null };
 
@@ -75,13 +75,13 @@ export default function PerfilPage() {
           <Avatar player={{ id: profile.id, name: profile.name, avatar: profile.image }} size="lg" />
 
           <div className="flex min-w-0 flex-[1_1_260px] flex-col gap-5">
-            <h2 className="font-display text-[clamp(2rem,5vw,3rem)] font-normal leading-[1.05] tracking-tight [overflow-wrap:anywhere]">
+            <h2 className="font-display text-[clamp(2rem,5vw,3rem)] font-black italic uppercase leading-none tracking-tight [overflow-wrap:anywhere]">
               {profile.name}
             </h2>
             <div>
               <p className="text-sm text-muted">Seu ID de jogador</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-3">
-                <code className="break-all rounded-lg border border-line bg-surface-2 px-3 py-2 font-mono text-sm">
+                <code className="break-all rounded-sm border border-line bg-surface-2 px-3 py-2 font-mono text-sm">
                   {profile.id}
                 </code>
                 <button className={ui.btnSecondary} onClick={copyId}>

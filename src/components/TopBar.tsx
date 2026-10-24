@@ -20,8 +20,8 @@ export default function TopBar() {
   return (
     <header className="mb-12 flex flex-wrap items-center justify-between gap-x-3 gap-y-3 border-b border-line pb-4">
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-        <Link href="/" className="font-display text-[1.7rem] leading-none tracking-tight">
-          Game Hub<span className="text-accent">.</span>
+        <Link href="/" className="font-display text-3xl font-black italic uppercase leading-none tracking-tight">
+          Game<span className="text-accent">Hub</span>
         </Link>
         {links.map((l) => {
           const active = pathname === l.href;
@@ -53,7 +53,7 @@ export default function TopBar() {
           <Link
             href="/perfil"
             aria-label={`Perfil de ${user.name}`}
-            className="flex items-center gap-2 rounded-xl py-1 pl-1 pr-2 text-sm transition hover:bg-surface-2"
+            className="flex items-center gap-2 rounded-sm py-1 pl-1 pr-2 text-sm transition hover:bg-surface-2"
           >
             <Avatar player={{ id: user.id, name: user.name }} size="sm" />
             <span className="hidden max-w-[14ch] truncate sm:inline">{user.name}</span>

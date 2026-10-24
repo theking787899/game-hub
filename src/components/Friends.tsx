@@ -28,7 +28,7 @@ function FeedbackMessage({ feedback }: { feedback: Feedback }) {
     );
   }
   return (
-    <p role="status" className="w-full max-w-[60ch] rounded-xl border border-good/40 bg-good/15 px-4 py-3">
+    <p role="status" className="w-full max-w-[60ch] rounded-sm border border-good/40 bg-good/15 px-4 py-3">
       {feedback.text}
     </p>
   );

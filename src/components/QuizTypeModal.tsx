@@ -36,7 +36,7 @@ export default function QuizTypeModal({ open, questionCount, onClose, onConfirm 
         if (e.target === ref.current) onClose();
       }}
       aria-labelledby="quiz-type-title"
-      className="m-auto w-[min(92vw,30rem)] rounded-2xl border border-line bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+      className="m-auto w-[min(92vw,30rem)] rounded-sm border border-line bg-surface p-0 text-fg shadow-2xl backdrop:bg-black/60 backdrop:backdrop-blur-sm"
     >
       <form onSubmit={submit} className="flex flex-col gap-6 p-6 sm:p-7">
         <div>
@@ -62,7 +62,7 @@ export default function QuizTypeModal({ open, questionCount, onClose, onConfirm 
                   onChange={() => setType(t.value)}
                   className="peer sr-only"
                 />
-                <span className="block h-full rounded-xl border border-line bg-surface-2 p-4 transition hover:border-fg/30 peer-checked:border-accent peer-checked:bg-accent/15 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg">
+                <span className="block h-full rounded-sm border border-line bg-surface-2 p-4 transition hover:border-fg/30 peer-checked:border-accent peer-checked:bg-accent/15 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg">
                   <span className="block text-lg font-medium">{t.label}</span>
                   <span className="mt-0.5 block text-sm text-muted">{t.description}</span>
                 </span>

@@ -31,7 +31,7 @@ export default function SoundToggle() {
       onClick={() => setSoundOn(!on)}
       aria-pressed={on}
       aria-label={on ? "Desligar o som" : "Ligar o som"}
-      className="grid size-9 cursor-pointer place-items-center rounded-xl border border-line bg-surface text-muted transition hover:text-fg"
+      className="grid size-9 cursor-pointer place-items-center rounded-sm border border-line bg-surface text-muted transition hover:text-fg"
     >
       {on ? <SpeakerOn /> : <SpeakerOff />}
     </button>

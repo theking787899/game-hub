@@ -49,7 +49,7 @@ export default function QuizResults({ players, scores, meId }: Props) {
           return (
             <li
               key={p.id}
-              className={`flex items-center gap-4 rounded-2xl border px-4 py-3.5 motion-safe:animate-rise ${
+              className={`flex items-center gap-4 rounded-sm border px-4 py-3.5 motion-safe:animate-rise ${
                 leader ? "border-accent/50 bg-accent/10" : "border-line bg-surface"
               }`}
             >

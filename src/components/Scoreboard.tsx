@@ -23,7 +23,7 @@ export default function Scoreboard({ players, scores, meId, winnerId, wrongIds =
         return (
           <li
             key={p.id}
-            className={`flex items-center gap-3 rounded-xl px-2.5 py-2 transition-colors ${won ? "bg-accent/15" : ""}`}
+            className={`flex items-center gap-3 rounded-sm px-2.5 py-2 transition-colors ${won ? "bg-accent/15" : ""}`}
           >
             <Avatar player={p} size="sm" />
             <span className="min-w-0 flex-1 font-medium [overflow-wrap:anywhere]">

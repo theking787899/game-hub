@@ -36,7 +36,7 @@ export default function RoundResultModal({ state, winner, score }: Props) {
           </>
         ) : (
           <>
-            <span className={`rounded-full p-1 ring-4 ${mine ? "ring-accent" : "ring-line"}`}>
+            <span className={`rounded-sm p-1 ring-4 ${mine ? "ring-accent" : "ring-line"}`}>
               <Avatar player={winner ?? { id: "?", name: "?" }} size="lg" />
             </span>
             <div>

@@ -5,14 +5,14 @@ import Avatar from "@/components/Avatar";
 import { ui } from "@/lib/ui";
 
 // Rota do servidor (o Next encaminha para o Express, ver next.config.mjs).
-const STATS_URL =  `${process.env.NEXT_PUBLIC_SOCKET_URL}/user/stats`;
+const STATS_URL = "/api/user/stats";
 const INITIAL_MATCHES = 8;
 
 type Match = {
   match_id: number | string;
   type: string;
-  gametype: string;
-  players: { id: string; name: string, imagem: string}[];
+  gameType: string;
+  players: { id: string; name: string }[];
 };
 
 type Stats = { totalPoints: number; gamesPlayed: number; gamesWon: number };
@@ -44,7 +44,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`rounded-2xl border p-4 sm:p-5 ${
+      className={`rounded-sm border p-4 sm:p-5 ${
         highlight ? "border-accent/50 bg-accent/10" : "border-line bg-surface"
       }`}
     >
@@ -102,7 +102,7 @@ export default function UserStats({ meId }: { meId?: string }) {
           {Array.from({ length: 4 }, (_, i) => (
             <div
               key={i}
-              className="h-[104px] rounded-2xl border border-line bg-surface motion-safe:animate-pulse"
+              className="h-[104px] rounded-sm border border-line bg-surface motion-safe:animate-pulse"
             />
           ))}
         </div>
@@ -159,7 +159,7 @@ export default function UserStats({ meId }: { meId?: string }) {
                     <div className="flex">
                       {players.slice(0, 5).map((p) => (
                         <span key={p.id} className="-ml-2 rounded-full ring-2 ring-surface first:ml-0">
-                          <Avatar player={{ id: p.id, name: p.name, avatar: p.imagem }} size="sm" />
+                          <Avatar player={{ id: p.id, name: p.name }} size="sm" />
                         </span>
                       ))}
                     </div>
@@ -168,7 +168,7 @@ export default function UserStats({ meId }: { meId?: string }) {
 
                     <span className="flex gap-1.5">
                       <span className={ui.tag}>{typeLabels[m.type] ?? m.type}</span>
-                      <span className={ui.tag}>{gameLabels[m.gametype] ?? m.gametype}</span>
+                      <span className={ui.tag}>{gameLabels[m.gameType] ?? m.gameType}</span>
                     </span>
                   </li>
                 );

@@ -44,7 +44,7 @@ export default function ThemeToggle() {
       type="button"
       onClick={toggle}
       aria-label={dark === null ? "Alternar tema" : dark ? "Mudar para o tema claro" : "Mudar para o tema escuro"}
-      className="grid size-9 cursor-pointer place-items-center rounded-xl border border-line bg-surface text-muted transition hover:text-fg"
+      className="grid size-9 cursor-pointer place-items-center rounded-sm border border-line bg-surface text-muted transition hover:text-fg"
     >
       {dark === null ? null : dark ? <SunIcon /> : <MoonIcon />}
     </button>

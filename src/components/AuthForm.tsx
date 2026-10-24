@@ -15,8 +15,6 @@ const messages: Record<string, string> = {
   INVALID_EMAIL: "Esse e-mail não parece válido.",
 };
 
-const dots = ["bg-p1", "bg-p2", "bg-p3", "bg-p4", "bg-p5"];
-
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const isLogin = mode === "login";
   const router = useRouter();
@@ -54,18 +52,13 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
       </div>
 
       <div>
-        <p className="font-display text-2xl tracking-tight">
-          Game Hub<span className="text-accent">.</span>
+        <p className="font-display text-3xl font-black italic uppercase tracking-tight">
+          Game<span className="text-accent">Hub</span>
         </p>
-        <h1 className="mt-8 font-display text-[clamp(2.6rem,5.5vw,4rem)] font-normal leading-[1.02] tracking-tight">
+        <h1 className="mt-8 font-display text-[clamp(2.6rem,5.5vw,4rem)] font-black italic uppercase leading-[0.9] tracking-tight">
           Jogue com o grupo, cada um no seu aparelho.
         </h1>
         <p className={ui.lead}>Crie uma sala, mande o link e comece o quiz em poucos segundos.</p>
-        <div className="mt-8 flex" aria-hidden="true">
-          {dots.map((tone) => (
-            <span key={tone} className={`-ml-2.5 size-10 rounded-full border-2 border-bg first:ml-0 ${tone}`} />
-          ))}
-        </div>
       </div>
 
       <form className={`${ui.card} flex flex-col gap-4 p-7 sm:p-8`} onSubmit={onSubmit}>

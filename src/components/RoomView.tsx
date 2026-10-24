@@ -137,7 +137,7 @@ export default function RoomView() {
           p ? (
             <li
               key={p.id}
-              className={`flex items-center gap-4 rounded-2xl border bg-surface p-4 transition-colors motion-safe:animate-rise ${
+              className={`flex items-center gap-4 rounded-sm border bg-surface p-4 transition-colors motion-safe:animate-rise ${
                 p.ready ? "border-good/50" : "border-line"
               }`}
             >
@@ -154,7 +154,7 @@ export default function RoomView() {
           ) : (
             <li
               key={`vazio-${i}`}
-              className="flex items-center gap-4 rounded-2xl border border-dashed border-line p-4 text-muted"
+              className="flex items-center gap-4 rounded-sm border border-dashed border-line p-4 text-muted"
             >
               <span className="size-12 flex-none rounded-full border border-dashed border-line" />
               Vaga livre

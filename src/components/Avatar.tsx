@@ -25,7 +25,7 @@ export default function Avatar({
 
   return (
     <span
-      className={`grid flex-none place-items-center overflow-hidden rounded-full font-display text-[#15161a] ${sizes[size]} ${toneFor(player.id)}`}
+      className={`grid flex-none place-items-center overflow-hidden rounded-sm font-display text-[#15161a] ${sizes[size]} ${toneFor(player.id)}`}
     >
       {hasImage ? (
         // eslint-disable-next-line @next/next/no-img-element

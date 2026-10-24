@@ -97,7 +97,7 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
           ) : null}
         </div>
 
-        <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-normal leading-[1.08] tracking-tight">
+        <h1 className="font-display text-[clamp(1.9rem,4.5vw,3rem)] font-extrabold italic leading-[1.05] tracking-tight">
           {quiz.question.question}
         </h1>
 
@@ -110,12 +110,12 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
                 disabled={locked}
                 aria-pressed={picked}
                 onClick={() => answerQuiz(opt)}
-                className={`flex min-h-16 cursor-pointer items-center gap-4 rounded-2xl border px-4 py-3.5 text-left text-lg font-medium transition enabled:hover:border-fg/40 enabled:hover:bg-surface-2 disabled:cursor-not-allowed ${
+                className={`flex min-h-16 cursor-pointer items-center gap-4 rounded-sm border px-4 py-3.5 text-left text-lg font-medium transition enabled:hover:border-fg/40 enabled:hover:bg-surface-2 disabled:cursor-not-allowed ${
                   picked ? "border-accent bg-accent/10" : "border-line bg-surface disabled:opacity-50"
                 }`}
               >
                 <span
-                  className={`grid size-8 flex-none place-items-center rounded-lg font-mono text-sm ${
+                  className={`grid size-8 flex-none place-items-center rounded-sm font-mono text-sm ${
                     picked ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted"
                   }`}
                 >
@@ -127,7 +127,7 @@ export default function QuizGame({ players, meId }: { players: Player[]; meId: s
           })}
         </div>
 
-        <p role="status" className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${tones[tone]}`}>
+        <p role="status" className={`flex items-center gap-3 rounded-sm border px-4 py-3 ${tones[tone]}`}>
           <span aria-hidden="true" className={`size-2 flex-none rounded-full ${dots[tone]}`} />
           {text}
         </p>

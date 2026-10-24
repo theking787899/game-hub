@@ -5,7 +5,7 @@ import Avatar from "@/components/Avatar";
 import { ui } from "@/lib/ui";
 
 // Rota do servidor (o Next encaminha para o Express, ver next.config.mjs).
-const RANKING_URL = `${process.env.NEXT_PUBLIC_SOCKET_URL}/ranking`;
+const RANKING_URL = "/api/ranking";
 
 export type RankingEntry = {
   id: string;
@@ -46,7 +46,7 @@ export default function Ranking({ meId }: { meId?: string }) {
 
   if (failed) {
     return (
-      <section className={`${ui.card} flex flex-col items-start gap-5 p-7`}>
+      <section className={`${ui.card} flex flex-col items-start gap-5 p-6 sm:p-7`}>
         <p role="alert">Não foi possível carregar o ranking.</p>
         <button className={ui.btnSecondary} onClick={load}>
           Tentar de novo
@@ -57,11 +57,11 @@ export default function Ranking({ meId }: { meId?: string }) {
 
   if (!entries) {
     return (
-      <div className="flex flex-col gap-3" aria-busy="true" aria-label="Carregando o ranking">
+      <div className="flex flex-col gap-2.5 sm:gap-3" aria-busy="true" aria-label="Carregando o ranking">
         {Array.from({ length: 5 }, (_, i) => (
           <div
             key={i}
-            className="h-[76px] rounded-2xl border border-line bg-surface motion-safe:animate-pulse"
+            className="h-[68px] rounded-sm border border-line bg-surface motion-safe:animate-pulse sm:h-[76px]"
           />
         ))}
       </div>
@@ -70,7 +70,7 @@ export default function Ranking({ meId }: { meId?: string }) {
 
   if (entries.length === 0) {
     return (
-      <section className={`${ui.card} p-7`}>
+      <section className={`${ui.card} p-6 sm:p-7`}>
         <h2 className={ui.h2}>Ainda não tem ninguém aqui</h2>
         <p className="mt-3 max-w-[44ch] text-muted">
           Jogue um quiz até o fim para entrar no ranking.
@@ -80,21 +80,22 @@ export default function Ranking({ meId }: { meId?: string }) {
   }
 
   return (
-    <ol aria-label="Ranking geral" className="flex flex-col gap-3">
+    <ol aria-label="Ranking geral" className="flex flex-col gap-2.5 sm:gap-3">
       {entries.map((e) => {
         const leader = e.position === 1;
         const mine = e.id === meId;
         const rate = e.gamesPlayed > 0 ? Math.round((e.gamesWon / e.gamesPlayed) * 100) : 0;
+        const avatar = { id: e.id, name: e.name, avatar: e.image };
 
         return (
           <li
             key={e.id}
-            className={`flex items-center gap-4 rounded-2xl border p-4 motion-safe:animate-rise ${
+            className={`flex items-center gap-3 rounded-sm border p-3 motion-safe:animate-rise sm:gap-4 sm:p-4 ${
               leader ? "border-accent/50 bg-accent/10" : "border-line bg-surface"
             }`}
           >
             <span
-              className={`grid size-10 flex-none place-items-center rounded-lg font-mono text-lg tabular-nums ${
+              className={`grid size-9 flex-none place-items-center rounded-sm font-mono text-base tabular-nums sm:size-10 sm:text-lg ${
                 leader ? "bg-accent text-accent-fg" : "bg-surface-2 text-muted"
               }`}
               aria-label={`${e.position}º lugar`}
@@ -102,23 +103,32 @@ export default function Ranking({ meId }: { meId?: string }) {
               {e.position}
             </span>
 
-            <Avatar player={{ id: e.id, name: e.name, avatar: e.image }} size="md" />
+            {/* Foto menor no celular, maior a partir de sm. */}
+            <span className="flex-none sm:hidden">
+              <Avatar player={avatar} size="sm" />
+            </span>
+            <span className="hidden flex-none sm:block">
+              <Avatar player={avatar} size="md" />
+            </span>
 
             <div className="min-w-0 flex-1">
-              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-lg font-medium">
-                <span className="[overflow-wrap:anywhere]">{e.name}</span>
+              <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-base font-medium sm:text-lg">
+                <span className="min-w-0 [overflow-wrap:anywhere]">{e.name}</span>
                 {mine && <span className={ui.tagAccent}>Você</span>}
               </p>
-              <p className="mt-0.5 text-sm text-muted">
-                {plural(e.gamesWon, "vitória", "vitórias")} em{" "}
-                {plural(e.gamesPlayed, "partida", "partidas")}
+              <p className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-muted">
+                <span>{plural(e.gamesWon, "vitória", "vitórias")}</span>
+                <span>{plural(e.gamesPlayed, "partida", "partidas")}</span>
+                <span className="sm:hidden">{rate}%</span>
               </p>
             </div>
 
-            <span className={`${ui.tag} hidden sm:inline-flex`}>{rate}% de vitórias</span>
+            <span className={`${ui.tag} hidden flex-none sm:inline-flex`}>{rate}% de vitórias</span>
 
-            <div className="text-right">
-              <p className="font-mono text-2xl tabular-nums">{numberFormat.format(e.totalPoints)}</p>
+            <div className="flex-none text-right">
+              <p className="font-mono text-xl tabular-nums sm:text-2xl">
+                {numberFormat.format(e.totalPoints)}
+              </p>
               <p className="text-xs text-muted">pontos</p>
             </div>
           </li>
