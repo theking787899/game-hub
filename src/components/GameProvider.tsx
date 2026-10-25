@@ -32,7 +32,6 @@ type QuestionPayload = {
   questionIndex: number;
   total?: number;
   endsAt: number;
-  remainingMs: number;
 };
 
 type GameContextValue = {
@@ -46,7 +45,8 @@ type GameContextValue = {
 
   createRoom: (questionCount: number) => void;
   joinRoom: (roomId: string) => void;
-  leaveRoom: () => void;
+  leaveRoom: (reason?: GameError) => void;
+  expulsePlayer: (userId: string) => void;
 
   createQuiz: (gameType: GameType) => void;
   toggleReady: () => void;
@@ -171,7 +171,7 @@ export default function GameProvider({
           winnerId: null,
           wrongIds: [],
           roundOver: false,
-          endsAt: Date.now() + payload.remainingMs,
+          endsAt: payload.endsAt,
           timeUp: false,
           scores: {},
         });
@@ -192,7 +192,7 @@ export default function GameProvider({
             winnerId: null,
             wrongIds: [],
             roundOver: false,
-            endsAt: Date.now() + payload.remainingMs,
+            endsAt: payload.endsAt,
             timeUp: false,
           };
         });
@@ -303,17 +303,36 @@ export default function GameProvider({
   }, []);
 
   // Sair da sala.
-  const leaveRoom = useCallback(() => {
-    if (room) {
-      getSocket().emit("room:leave", {
-        roomId: room.id,
-      });
-    }
+  // Com `reason` a pessoa foi removida (ex.: expulsa): sai só no front e mostra o motivo.
+  const leaveRoom = useCallback(
+    (reason?: GameError) => {
+      if (room && !reason) {
+        getSocket().emit("room:leave", {
+          roomId: room.id,
+        });
+      }
 
-    setRoom(null);
-    setQuiz(null);
-    setError(null);
-  }, [room]);
+      setRoom(null);
+      setQuiz(null);
+      setError(reason ?? null);
+    },
+    [room],
+  );
+
+  // Só o anfitrião: expulsa o jogador `userId` da sala.
+  const expulsePlayer = useCallback(
+    (userId: string) => {
+      if (!room) return;
+
+      setError(null);
+
+      getSocket().emit("room:expulse", {
+        roomId: room.id,
+        userId,
+      });
+    },
+    [room],
+  );
 
   // Marcar (ou desmarcar) o jogador como pronto.
   // O novo estado volta para todos pelo room:updated.
@@ -406,6 +425,7 @@ export default function GameProvider({
         createRoom,
         joinRoom,
         leaveRoom,
+        expulsePlayer,
 
         createQuiz,
         toggleReady,

@@ -14,11 +14,21 @@ export default function RoomView() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { user, authPending, connected, room, error, quiz, questionCount, joinRoom, leaveRoom, createQuiz, toggleReady } =
+  const { user, authPending, connected, room, error, quiz, questionCount, joinRoom, leaveRoom, createQuiz, toggleReady, expulsePlayer } =
     useGame();
 
   const [copied, setCopied] = useState(false);
   const [choosingType, setChoosingType] = useState(false);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
+  // Se a sala atualizar sem a minha pessoa na lista, fui removido: volta ao início.
+  useEffect(() => {
+    if (!user || !room || room.id !== id) return;
+    if (!room.players.some((p) => p.id === user.id)) {
+      leaveRoom({ code: "EXPELLED", message: "Você foi removido da sala pelo anfitrião." });
+      router.push("/");
+    }
+  }, [room, user, id, leaveRoom, router]);
 
   useEffect(() => {
     if (!authPending && !user) router.replace("/login");
@@ -137,7 +147,7 @@ export default function RoomView() {
           p ? (
             <li
               key={p.id}
-              className={`flex items-center gap-4 rounded-sm border bg-surface p-4 transition-colors motion-safe:animate-rise ${
+              className={`flex flex-wrap items-center gap-4 rounded-sm border bg-surface p-4 transition-colors motion-safe:animate-rise ${
                 p.ready ? "border-good/50" : "border-line"
               }`}
             >
@@ -150,6 +160,28 @@ export default function RoomView() {
                   {p.ready && <span className={ui.tagGood}>Pronto</span>}
                 </p>
               </div>
+              {isHost &&
+                p.id !== user.id &&
+                (confirmId === p.id ? (
+                  <div className="ml-auto flex gap-2">
+                    <button
+                      className={ui.btnPrimary}
+                      onClick={() => {
+                        expulsePlayer(p.id);
+                        setConfirmId(null);
+                      }}
+                    >
+                      Confirmar
+                    </button>
+                    <button className={ui.btnSecondary} onClick={() => setConfirmId(null)}>
+                      Cancelar
+                    </button>
+                  </div>
+                ) : (
+                  <button className={`${ui.btnSecondary} ml-auto`} onClick={() => setConfirmId(p.id)}>
+                    Expulsar
+                  </button>
+                ))}
             </li>
           ) : (
             <li
